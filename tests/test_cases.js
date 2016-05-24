@@ -7,26 +7,23 @@ var obj;
 
 beforeEach(function () {
   obj = {
-    some: function () {
-      console.log(1);
+    val: 0,
+    closureVal: function () {
+      var a = 1;
+      return a + this.val;
     }
   };
 });
 
-describe('before.', function () {
-  it('common test.', function () {
+describe('Before tests.', function () {
+  it('Patch value from closure.', function () {
 
-    var obj = {
-      some: function () {
-        console.log(1);
-      }
-    };
-
-    monkKeyPatch.override(obj, 'some', monkKeyPatch.before(function () {
-      console.log('monkey');
+    monkKeyPatch.override(obj, 'closureVal', monkKeyPatch.before(function () {
+      this.val = 1;
     }));
 
-    obj.some();
+    var result = obj.closureVal();
+    expect(result).equal(2);
 
   })
 });
