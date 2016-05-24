@@ -1,0 +1,29 @@
+{
+  "name": "monk-key-patch",
+  "version": "0.0.1",
+  "description": "Library for properly Monkey-patching",
+  "main": "./dist/monk-key-patching.js",
+  "scripts": {
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/se-panfilov/monk-key-patch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/se-panfilov/monk-key-patch/issues"
+  },
+  "keywords": [
+    "monk-key-patch",
+    "monk-key-patching",
+    "monkey",
+    "patching",
+    "override",
+    "monkey-patching"
+  ],
+  "ignore": {},
+  "author": "S.Panfilov <se-panfilov@ya.ru> (https://se-panfilov.github.io)",
+  "private": false,
+  "dependencies": {},
+  "devDependencies": {}
+}
