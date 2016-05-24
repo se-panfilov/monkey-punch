@@ -12,6 +12,5 @@ gulp.task('default', function () {
 
 gulp.task('watch', function () {
     var watch = require('gulp-watch');
-
     gulp.watch(config.js.src, ['js', 'todo']);
 });
