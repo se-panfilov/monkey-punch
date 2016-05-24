@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "Library for properly Monkey-patching",
   "main": "./dist/monk-key-patching.js",
-  "scripts": {},
+  "scripts": {
+    "test": "mocha -R spec ./tests/"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -25,6 +27,7 @@
   "private": false,
   "dependencies": {},
   "devDependencies": {
+    "chai": "^3.5.0",
     "gulp-concat": "^2.6.0",
     "gulp-jshint": "^2.0.1",
     "gulp-notify": "^2.2.0",
@@ -37,6 +40,7 @@
     "gulp-watch": "^4.3.6",
     "jshint": "^2.9.2",
     "jshint-stylish": "^2.2.0",
+    "mocha": "^2.5.2",
     "require-dir": "^0.3.0",
     "run-sequence": "^1.2.1"
   }
