@@ -3,32 +3,29 @@ Lib for greceful Monkey-patching.
 [Monkey-patching][1] is a way to override or extend the behaviour of a method without changing its original source code.
 
 
-Override
----------
+### Override
 
 What it does: it sends the original function into the callback function, and whatever that callback function returns, we replace the object’s method with it.
 
-```
+```javascript
 function override(object, methodName, callback) {
   object[methodName] = callback(object[methodName])
 }
 ```
 
 
-Decorators
----------
+## Decorators
 
 [More info][2] about decorators
 
-After
----------
+### After
 
 1. Call the original function;
 2. Save its return value;
 3. Do our work;
 4. Return the saved return value;
 
-```
+```javascript
 function after(extraBehavior) {
   return function(original) {
     return function() {
@@ -40,10 +37,9 @@ function after(extraBehavior) {
 }
 ```
 
-Before
----------
+### Before
 
-```
+```javascript
 function before(extraBehavior) {
   return function(original) {
     return function() {
@@ -55,10 +51,9 @@ function before(extraBehavior) {
 ```
 
 
-Compose
----------
+### Compose
 
-```
+```javascript
 function compose(extraBehavior) {
   return function(original) {
     return function() {
@@ -68,10 +63,9 @@ function compose(extraBehavior) {
 }
 ```
 
-Benchmark
----------
+### Benchmark
 
-```
+```javascript
 function benchmark(original) {
   return function() {
     var startTime = new Date().getTime()
@@ -83,10 +77,9 @@ function benchmark(original) {
 }
 ```
 
-Memoize
----------
+### Memoize
 
-```
+```javascript
 // XXX: Work only with functions with 1 argument.
 function memoize(original) {
   var memo = { }
@@ -98,13 +91,11 @@ function memoize(original) {
 }
 ```
 
-References
----------
+## References
 
 Library based on [this article][3] by [Thai Pangsakulyanont][4].
 
-LICENSE
----------
+## LICENSE
 
 MIT: https://github.com/se-panfilov/monk-key-patch/blob/master/LICENSE
 
