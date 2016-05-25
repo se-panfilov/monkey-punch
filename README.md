@@ -2,7 +2,6 @@ Lib for greceful Monkey-patching.
 
 [Monkey-patching][1] is a way to override or extend the behaviour of a method without changing its original source code.
 
-
 ### Override
 
 What it does: it sends the original function into the callback function, and whatever that callback function returns, we replace the object’s method with it.
@@ -12,7 +11,6 @@ function override(object, methodName, callback) {
   object[methodName] = callback(object[methodName])
 }
 ```
-
 
 ## Decorators
 
@@ -99,7 +97,7 @@ Library based on [this article][3] by [Thai Pangsakulyanont][4].
 
 MIT: https://github.com/se-panfilov/monk-key-patch/blob/master/LICENSE
 
-[1]:[https://en.wikipedia.org/wiki/Monkey_patch]
-[2]:[http://javascript.info/tutorial/decorators]
-[3]:[http://me.dt.in.th/page/JavaScript-override/]
-[4]:[http://dt.in.th/]
+[1]: https://en.wikipedia.org/wiki/Monkey_patch
+[2]: http://javascript.info/tutorial/decorators
+[3]: http://me.dt.in.th/page/JavaScript-override/
+[4]: http://dt.in.th/
