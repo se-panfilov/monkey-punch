@@ -1,4 +1,4 @@
-var jsvat = (function () {
+var monkKeyPatch = (function () {
   'use strict';
 
   var exports = {
@@ -47,7 +47,6 @@ var jsvat = (function () {
       }
     }
   };
-
 
   //Support of node.js
   if (typeof module === 'object' && module.exports) module.exports = exports;
