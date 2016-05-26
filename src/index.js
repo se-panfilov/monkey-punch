@@ -2,65 +2,66 @@
 
 var Monkey = (function (config) {
 
-  if (!config) console.log('error');
+  if (!config) console.log('no config error');
 
   var obj = config.obj;
   var methodName = config.method;
   var method = obj[methodName];
-  var methodArr = method.toString().split("\n");
+  var lineDelimiter = '\n';
+  var methodArr = method.toString().split(lineDelimiter);
+  //TODO (S.Panfilov) perhaps should have count without first and last lines (didn't sure)
   var linesCount = methodArr.length;
 
-  // //TODO (S.Panfilov) should check all possible valuse that upper than linesCount
-  // if (config[linesCount + 1]) console.log('error - string not in func range');
-  //
-  // //TODO (S.Panfilov) should check all possible valuse that lower than 0
-  // if (config['-1']) console.log('error - string not in func range');
+  var keys = Object.keys(obj);
+  var linesKeys = keys.filter(isFinite);
+  var minLineKey = Math.min.apply(null, linesKeys);
+  var maxLineKey = Math.max.apply(null, linesKeys);
 
-  var isLinesPatches = false; //TODO (S.Panfilov) should check for keys like 1, 2, 3, etc...
+  if (maxLineKey > linesCount) {
+    console.log('error - string not in func range (max)');
+    return;
+  }
 
-  // var fixedFields = ['obj', 'method', 'before', 'after'];
-  //
-  // if (isLinesPatches) {
-  //   for (var key in config) {
-  //
-  //     var isFixedField = false;
-  //     for (var i = 0; i < fixedFields.length; i++) {
-  //       var fixedField = fixedFields[i];
-  //
-  //
-  //       if (key === fixedField) {
-  //         isFixedField = (key === fixedField);
-  //         break;
-  //       }
-  //
-  //       if (!isFixedField) {
-  //
-  //       }
-  //     }
-  //
-  //   }
-  // }
+  if (minLineKey <= 0) {
+    console.log('error - string not in func range (min)');
+    return;
+  }
+
+  var isLinesPatches = linesKeys.length > 0;
+  var isBefore = typeof config.before === 'function';
+  var isAfter = typeof config.after === 'function';
+
+  function modifyFuncBody(obj, method, injection, injectionLine) {
+    var delimiter = '\n';
+    // Split function into array of strings
+    var arr = obj[method].toString().split(delimiter);
+    // Remove first line: "function (a) {" (to be honest we should first parse and remember args)
+    arr.splice(0, 1);
+    //Remove last line: "}"
+    arr.splice(arr.length - 1, 1);
+    // Insert our expression (b = 2) at "line 2"
+    arr.splice(injectionLine, 0, injection);
+    // Create a string with our function
+    var str = arr.join(delimiter);
+    //Create function with new Function()
+    var newFunc = new Function("a", str); //a -is our argument for "[method]" func
+    obj[method] = newFunc;
+  }
 
   var exports = {
-    patch: function () {
+    hack: function () {
 
-      exports._override(config.obj, config.method, exports._before(function () {
-        config.before()
-      }));
+      // exports._override(config.obj, config.method, exports._before(function () {
+      //   config.before()
+      // }));
 
-      // this._override(config.obj, config.method, function (original) {
-      //   if (typeof config.before === 'function') {
-      //     config.before.apply(this, arguments);
-      //   }
-      //
-      //   var returnValue //= original.apply(this, arguments);
-      //
-      //   if (typeof config.after === 'function') {
-      //     config.after.apply(this, arguments);
-      //   }
-      //
-      //   return returnValue;
-      // });
+      this._override(config.obj, config.method, function (original) {
+        if (isBefore) config.before.apply(this, arguments);
+        var returnValue = original.apply(this, arguments);
+        if (isAfter) config.before.apply(this, arguments);
+
+        return returnValue;
+      });
     },
     _override: function (object, methodName, callback) {
       object[methodName] = callback(object[methodName])
@@ -123,5 +124,5 @@ var sumMonkey = new Monkey({
   5: doAtFifthLine
 });
 
-var result = sumMonkey.patch();
+var result = sumMonkey.hack();
 console.log(result);
