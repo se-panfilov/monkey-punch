@@ -75,32 +75,62 @@ var Monkey = (function (config) {
 
   var isLinesPatches = false; //TODO (S.Panfilov) should check for keys like 1, 2, 3, etc...
 
-  var fixedFields = ['obj', 'method', 'before', 'after'];
-
-  if (isLinesPatches) {
-    for (var key in config) {
-
-      var isFixedField = false;
-      for (var i = 0; i < fixedFields.length; i++) {
-        var fixedField = fixedFields[i];
-
-
-        if (key === fixedField) {
-          isFixedField = (key === fixedField);
-          break;
-        }
-
-        if (!isFixedField) {
-
-        }
-      }
-
-    }
-  }
+  // var fixedFields = ['obj', 'method', 'before', 'after'];
+  //
+  // if (isLinesPatches) {
+  //   for (var key in config) {
+  //
+  //     var isFixedField = false;
+  //     for (var i = 0; i < fixedFields.length; i++) {
+  //       var fixedField = fixedFields[i];
+  //
+  //
+  //       if (key === fixedField) {
+  //         isFixedField = (key === fixedField);
+  //         break;
+  //       }
+  //
+  //       if (!isFixedField) {
+  //
+  //       }
+  //     }
+  //
+  //   }
+  // }
 
   var exports = {
     patch: function () {
-      //
+      if (typeof config.before === 'function') {
+        this._override(config.obj, config.method, this._before(function () {
+          config.before();
+        }));
+      }
+
+      if (typeof config.after === 'function') {
+        this._override(config.obj, config.method, this._after(function () {
+          config.after();
+        }));
+      }
+    },
+    _override: function (object, methodName, callback) {
+      object[methodName] = callback(object[methodName])
+    },
+    _before: function (extraBehavior) {
+      return function (original) {
+        return function () {
+          extraBehavior.apply(this, arguments);
+          return original.apply(this, arguments);
+        }
+      }
+    },
+    _after: function (extraBehavior) {
+      return function (original) {
+        return function () {
+          var returnValue = original.apply(this, arguments);
+          extraBehavior.apply(this, arguments);
+          return returnValue
+        }
+      }
     }
   };
 
