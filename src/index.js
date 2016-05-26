@@ -1,60 +1,3 @@
-var monkKeyPatch = (function () {
-  'use strict';
-
-  var exports = {
-    override: function (object, methodName, callback) {
-      object[methodName] = callback(object[methodName])
-    },
-    after: function (extraBehavior) {
-      return function (original) {
-        return function () {
-          var returnValue = original.apply(this, arguments);
-          extraBehavior.apply(this, arguments);
-          return returnValue
-        }
-      }
-    },
-    before: function (extraBehavior) {
-      return function (original) {
-        return function () {
-          extraBehavior.apply(this, arguments);
-          return original.apply(this, arguments);
-        }
-      }
-    },
-    compose: function (extraBehavior) {
-      return function (original) {
-        return function () {
-          return extraBehavior.call(this, original.apply(this, arguments));
-        }
-      }
-    },
-    benchmark: function (original) {
-      return function () {
-        var startTime = new Date().getTime();
-        var returnValue = original.apply(this, arguments);
-        var finishTime = new Date().getTime();
-        console.log('Took', finishTime - startTime, 'ms.');
-        return returnValue;
-      }
-    },
-    memoize: function (original) {// XXX: Work only with functions with 1 argument.
-      var memo = {};
-      return function (x) {
-        if (Object.prototype.hasOwnProperty.call(memo, x)) return memo[x];
-        memo[x] = original.call(this, x);
-        return memo[x];
-      }
-    }
-  };
-
-  //Support of node.js
-  if (typeof module === 'object' && module.exports) module.exports = exports;
-
-  return exports;
-})();
-
-
 'use strict';
 
 var Monkey = (function (config) {
@@ -67,11 +10,11 @@ var Monkey = (function (config) {
   var methodArr = method.toString().split("\n");
   var linesCount = methodArr.length;
 
-  //TODO (S.Panfilov) should check all possible valuse that upper than linesCount
-  if (config[linesCount + 1]) console.log('error - string not in func range');
-
-  //TODO (S.Panfilov) should check all possible valuse that lower than 0
-  if (config['-1']) console.log('error - string not in func range');
+  // //TODO (S.Panfilov) should check all possible valuse that upper than linesCount
+  // if (config[linesCount + 1]) console.log('error - string not in func range');
+  //
+  // //TODO (S.Panfilov) should check all possible valuse that lower than 0
+  // if (config['-1']) console.log('error - string not in func range');
 
   var isLinesPatches = false; //TODO (S.Panfilov) should check for keys like 1, 2, 3, etc...
 
@@ -100,17 +43,24 @@ var Monkey = (function (config) {
 
   var exports = {
     patch: function () {
-      if (typeof config.before === 'function') {
-        this._override(config.obj, config.method, this._before(function () {
-          config.before();
-        }));
-      }
 
-      if (typeof config.after === 'function') {
-        this._override(config.obj, config.method, this._after(function () {
-          config.after();
-        }));
-      }
+      exports._override(config.obj, config.method, exports._before(function () {
+        config.before()
+      }));
+
+      // this._override(config.obj, config.method, function (original) {
+      //   if (typeof config.before === 'function') {
+      //     config.before.apply(this, arguments);
+      //   }
+      //
+      //   var returnValue //= original.apply(this, arguments);
+      //
+      //   if (typeof config.after === 'function') {
+      //     config.after.apply(this, arguments);
+      //   }
+      //
+      //   return returnValue;
+      // });
     },
     _override: function (object, methodName, callback) {
       object[methodName] = callback(object[methodName])
@@ -137,6 +87,13 @@ var Monkey = (function (config) {
   return exports;
 });
 
+var patchTarget = {
+  sum: function (a, b) {
+    console.log('sum!');
+    return a + b;
+  }
+};
+
 function doItBefore(cb) {
   console.log('before');
   if (cb) cb();
@@ -158,7 +115,7 @@ function doAtFifthLine(cb) {
 }
 
 var sumMonkey = new Monkey({
-  obj: exports,
+  obj: patchTarget,
   method: 'sum',
   before: doItBefore,
   after: doItAfter,
@@ -166,4 +123,5 @@ var sumMonkey = new Monkey({
   5: doAtFifthLine
 });
 
-sumMonkey.patch();
+var result = sumMonkey.patch();
+console.log(result);
