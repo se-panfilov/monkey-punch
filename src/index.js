@@ -4,49 +4,29 @@ var Monkey = (function (config) {
 
   if (!config) console.log('no config error');
 
-  var obj = config.obj;
-  var methodName = config.method;
-  var method = obj[methodName];
-  var lineDelimiter = '\n';
-  var methodArr = method.toString().split(lineDelimiter);
+  config.linesDelimiter = config.linesDelimiter || '\n';
+  var methodArr = config.obj[config.method].toString().split(config.linesDelimiter);
   //TODO (S.Panfilov) perhaps should have count without first and last lines (didn't sure)
   var linesCount = methodArr.length;
 
-  var keys = Object.keys(obj);
-  var linesKeys = keys.filter(isFinite);
-  var minLineKey = Math.min.apply(null, linesKeys);
-  var maxLineKey = Math.max.apply(null, linesKeys);
+  config._keys = Object.keys(config);
+  config._linesKeys = config._keys.filter(isFinite);
+  config._minLineKey = Math.min.apply(null, config._linesKeys);
+  config._maxLineKey = Math.max.apply(null, config._linesKeys);
 
-  if (maxLineKey > linesCount) {
+  if (config._maxLineKey > linesCount) {
     console.log('error - string not in func range (max)');
     return;
   }
 
-  if (minLineKey <= 0) {
+  if (config._minLineKey <= 0) {
     console.log('error - string not in func range (min)');
     return;
   }
 
-  var isLinesPatches = linesKeys.length > 0;
-  var isBefore = typeof config.before === 'function';
-  var isAfter = typeof config.after === 'function';
-
-  function modifyFuncBody(obj, method, injection, injectionLine) {
-    var delimiter = '\n';
-    // Split function into array of strings
-    var arr = obj[method].toString().split(delimiter);
-    // Remove first line: "function (a) {" (to be honest we should first parse and remember args)
-    arr.splice(0, 1);
-    //Remove last line: "}"
-    arr.splice(arr.length - 1, 1);
-    // Insert our expression (b = 2) at "line 2"
-    arr.splice(injectionLine, 0, injection);
-    // Create a string with our function
-    var str = arr.join(delimiter);
-    //Create function with new Function()
-    var newFunc = new Function("a", str); //a -is our argument for "[method]" func
-    obj[method] = newFunc;
-  }
+  config._isLinesPatches = config._linesKeys.length > 0;
+  var isBefore = !!config.before;
+  var isAfter = !!config.after;
 
   var exports = {
     hack: function () {
@@ -63,8 +43,41 @@ var Monkey = (function (config) {
         return returnValue;
       });
     },
-    _override: function (object, methodName, callback) {
-      object[methodName] = callback(object[methodName])
+    // _override: function (object, methodName, callback) {
+    //   object[methodName] = callback(object[methodName])
+    // },
+    _override: function (callback) {
+      var object = config.object;
+      var method = config.method;
+
+      if (config._isLinesPatches) {
+        for (var i = 0; i < config._linesKeys.length; i++) {
+          var lineKey = config._linesKeys[i];
+
+        }
+        this._modifyBody(config[lineKey], lineKey)
+      }
+
+      object[method] = callback(object[method])
+    },
+    _modifyBody: function (injection, injectionLine) {
+      var object = config.object;
+      var method = config.method;
+
+      var delimiter = '\n';
+      // Split function into array of strings
+      var arr = obj[method].toString().split(delimiter);
+      // Remove first line: "function (a) {" (to be honest we should first parse and remember args)
+      arr.splice(0, 1);
+      //Remove last line: "}"
+      arr.splice(arr.length - 1, 1);
+      // Insert our expression (b = 2) at "line 2"
+      arr.splice(injectionLine, 0, injection);
+      // Create a string with our function
+      var str = arr.join(delimiter);
+      //Create function with new Function()
+      var newFunc = new Function("a", str); //a -is our argument for "[method]" func
+      obj[method] = newFunc;
     },
     _before: function (extraBehavior) {
       return function (original) {
