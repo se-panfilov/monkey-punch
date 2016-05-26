@@ -103,7 +103,12 @@ var Monkey = (function (config) {
 
 var patchTarget = {
   sum: function (a, b) {
-    console.log('sum!');
+    console.log('Line: 0');
+    console.log('Line: 1');
+    console.log('Line: 2');
+    console.log('Line: 3');
+    console.log('sum! (line 4)');
+    console.log('Line: 5');
     return a + b;
   }
 };
