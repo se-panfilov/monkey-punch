@@ -1,50 +1,71 @@
-var monkKeyPatch = (function () {
+var Monkey = (function (config) {
   'use strict';
 
+  if (!config) console.error('Error: no config');
+
+  config.linesDelimiter = config.linesDelimiter || '\n';
+  var methodArr = config.obj[config.method].toString().split(config.linesDelimiter);
+  //TODO (S.Panfilov) perhaps should have count without first and last lines (didn't sure)
+  var linesCount = methodArr.length;
+
+  config._keys = Object.keys(config);
+  var numberSort = function (a, b) {
+    return a > b
+  };
+  config._linesKeys = config._keys.filter(isFinite).sort(numberSort);
+  config._minLineKey = Math.min.apply(null, config._linesKeys);
+  config._maxLineKey = Math.max.apply(null, config._linesKeys);
+
+  if (config._maxLineKey > linesCount) {
+    console.error('Error: line number too big');
+    return;
+  }
+
+  if (config._minLineKey <= 0) {
+    console.error('Error: line number too lower than 0');
+    return;
+  }
+
+  config._isLinesPatches = config._linesKeys.length > 0;
+  var isBefore = !!config.before;
+  var isAfter = !!config.after;
+
   var exports = {
-    override: function (object, methodName, callback) {
-      object[methodName] = callback(object[methodName])
-    },
-    after: function (extraBehavior) {
-      return function (original) {
+    hack: function () {
+      this._override(function (original) {
         return function () {
+          if (isBefore) config.before.apply(this, arguments);
           var returnValue = original.apply(this, arguments);
-          extraBehavior.apply(this, arguments);
-          return returnValue
+          if (isAfter) config.after.apply(this, arguments);
+
+          return returnValue;
         }
-      }
+      });
     },
-    before: function (extraBehavior) {
-      return function (original) {
-        return function () {
-          extraBehavior.apply(this, arguments);
-          return original.apply(this, arguments);
-        }
+    _override: function (callback) {
+      var object = config.obj;
+      var method = config.method;
+
+      if (config._isLinesPatches) {
+        object[method] = this._modifyLines(config);
       }
+
+      object[method] = callback(object[method]);
     },
-    compose: function (extraBehavior) {
-      return function (original) {
-        return function () {
-          return extraBehavior.call(this, original.apply(this, arguments));
-        }
+    _modifyLines: function (config) {
+      var arr = config.obj[config.method].toString().split(config.linesDelimiter);
+      // Remove first line: "function (a) {" (to be honest we should first parse and remember args)
+      arr.splice(0, 1);
+      // Remove last line: "}"
+      arr.splice(arr.length - 1, 1);
+
+      for (var i = config._linesKeys.length - 1; i >= 0; i--) {
+        var lineKey = config._linesKeys[i];
+        arr.splice(lineKey, 0, config[lineKey]);
       }
-    },
-    benchmark: function (original) {
-      return function () {
-        var startTime = new Date().getTime();
-        var returnValue = original.apply(this, arguments);
-        var finishTime = new Date().getTime();
-        console.log('Took', finishTime - startTime, 'ms.');
-        return returnValue;
-      }
-    },
-    memoize: function (original) {// XXX: Work only with functions with 1 argument.
-      var memo = {};
-      return function (x) {
-        if (Object.prototype.hasOwnProperty.call(memo, x)) return memo[x];
-        memo[x] = original.call(this, x);
-        return memo[x];
-      }
+      var str = arr.join(config.linesDelimiter);
+
+      return new Function('a', 'b', str); //a -is our argument for "[method]" func
     }
   };
 
@@ -52,4 +73,4 @@ var monkKeyPatch = (function () {
   if (typeof module === 'object' && module.exports) module.exports = exports;
 
   return exports;
-})();
+});
