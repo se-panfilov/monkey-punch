@@ -10,7 +10,10 @@ var Monkey = (function (config) {
   var linesCount = methodArr.length;
 
   config._keys = Object.keys(config);
-  config._linesKeys = config._keys.filter(isFinite);
+  var numberSort = function (a, b) {
+    return a > b
+  };
+  config._linesKeys = config._keys.filter(isFinite).sort(numberSort);
   config._minLineKey = Math.min.apply(null, config._linesKeys);
   config._maxLineKey = Math.max.apply(null, config._linesKeys);
 
@@ -44,42 +47,26 @@ var Monkey = (function (config) {
       var object = config.obj;
       var method = config.method;
 
-      // if (config._isLinesPatches) {
-      //   for (var i = 0; i < config._linesKeys.length; i++) {
-      //     var lineKey = config._linesKeys[i];
-      //
-      //   }
-      //   this._modifyBody(config[lineKey], lineKey)
-      // }
+      if (config._isLinesPatches) {
+        object[method] = this._modifyLines(config);
+      }
 
       object[method] = callback(object[method]);
     },
-    _modifyBody: function (injection, injectionLine) {
-      var object = config.obj;
-      var method = config.method;
-
-      var delimiter = '\n';
-      // Split function into array of strings
-      var arr = obj[method].toString().split(delimiter);
+    _modifyLines: function (config) {
+      var arr = config.obj[config.method].toString().split(config.linesDelimiter);
       // Remove first line: "function (a) {" (to be honest we should first parse and remember args)
       arr.splice(0, 1);
-      //Remove last line: "}"
+      // Remove last line: "}"
       arr.splice(arr.length - 1, 1);
-      // Insert our expression (b = 2) at "line 2"
-      arr.splice(injectionLine, 0, injection);
-      // Create a string with our function
-      var str = arr.join(delimiter);
-      //Create function with new Function()
-      var newFunc = new Function("a", str); //a -is our argument for "[method]" func
-      obj[method] = newFunc;
-    },
-    _before: function (extraBehavior) {
-      return function (original) {
-        return function () {
-          extraBehavior.apply(this, arguments);
-          return original.apply(this, arguments);
-        }
+
+      for (var i = config._linesKeys.length - 1; i >= 0; i--) {
+        var lineKey = config._linesKeys[i];
+        arr.splice(lineKey, 0, config[lineKey]);
       }
+      var str = arr.join(config.linesDelimiter);
+
+      return new Function('a', 'b', str); //a -is our argument for "[method]" func
     }
   };
 
@@ -114,7 +101,7 @@ var sumMonkey = new Monkey({
   before: doItBefore,
   after: doItAfter,
   1: 'console.log(\'-> injection on line 1\')',
-  5: 'console.log(\'-> injection on line 5\')'
+  5: 'console.log(\'-> injection on line 5\');\n a +=a; \n console.log(\'end of injection ->\')'
 });
 
 sumMonkey.hack();
