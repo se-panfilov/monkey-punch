@@ -1,7 +1,7 @@
 var Monkey = (function (config) {
   'use strict';
 
-  if (!config) console.log('no config error');
+  if (!config) console.error('Error: no config');
 
   config.linesDelimiter = config.linesDelimiter || '\n';
   var methodArr = config.obj[config.method].toString().split(config.linesDelimiter);
@@ -17,12 +17,12 @@ var Monkey = (function (config) {
   config._maxLineKey = Math.max.apply(null, config._linesKeys);
 
   if (config._maxLineKey > linesCount) {
-    console.log('error - string not in func range (max)');
+    console.error('Error: line number too big');
     return;
   }
 
   if (config._minLineKey <= 0) {
-    console.log('error - string not in func range (min)');
+    console.error('Error: line number too lower than 0');
     return;
   }
 
@@ -69,40 +69,8 @@ var Monkey = (function (config) {
     }
   };
 
+  //Support of node.js
+  if (typeof module === 'object' && module.exports) module.exports = exports;
+
   return exports;
 });
-
-var patchTarget = {
-  sum: function (a, b) {
-    console.log('-------Line: 0-------');
-    console.log('Line: 1');
-    console.log('Line: 2');
-    console.log('Line: 3');
-    console.log('sum! (line 4)');
-    console.log('-------Line: 5-------');
-    return a + b;
-  }
-};
-
-function doItBefore(cb) {
-  console.log('before');
-  //if (cb) cb();
-}
-
-function doItAfter(cb) {
-  console.log('after');
-  //if (cb) cb();
-}
-
-var sumMonkey = new Monkey({
-  obj: patchTarget,
-  method: 'sum',
-  before: doItBefore,
-  after: doItAfter,
-  1: 'console.log(\'-> injection on line 1\')',
-  5: 'console.log(\'-> injection on line 5\');\n a +=a; \n console.log(\'end of injection(5) ->\')'
-});
-
-sumMonkey.hack();
-var result = patchTarget.sum(1, 2);
-console.log('result:' + result);
