@@ -30,38 +30,32 @@ var Monkey = (function (config) {
 
   var exports = {
     hack: function () {
+      this._override(function (original) {
+        return function () {
+          if (isBefore) config.before.apply(this, arguments);
+          var returnValue = original.apply(this, arguments);
+          if (isAfter) config.after.apply(this, arguments);
 
-      // exports._override(config.obj, config.method, exports._before(function () {
-      //   config.before()
-      // }));
-
-      this._override(config.obj, config.method, function (original) {
-        if (isBefore) config.before.apply(this, arguments);
-        var returnValue = original.apply(this, arguments);
-        if (isAfter) config.before.apply(this, arguments);
-
-        return returnValue;
+          return returnValue;
+        }
       });
     },
-    // _override: function (object, methodName, callback) {
-    //   object[methodName] = callback(object[methodName])
-    // },
     _override: function (callback) {
-      var object = config.object;
+      var object = config.obj;
       var method = config.method;
 
-      if (config._isLinesPatches) {
-        for (var i = 0; i < config._linesKeys.length; i++) {
-          var lineKey = config._linesKeys[i];
+      // if (config._isLinesPatches) {
+      //   for (var i = 0; i < config._linesKeys.length; i++) {
+      //     var lineKey = config._linesKeys[i];
+      //
+      //   }
+      //   this._modifyBody(config[lineKey], lineKey)
+      // }
 
-        }
-        this._modifyBody(config[lineKey], lineKey)
-      }
-
-      object[method] = callback(object[method])
+      object[method] = callback(object[method]);
     },
     _modifyBody: function (injection, injectionLine) {
-      var object = config.object;
+      var object = config.obj;
       var method = config.method;
 
       var delimiter = '\n';
@@ -86,15 +80,6 @@ var Monkey = (function (config) {
           return original.apply(this, arguments);
         }
       }
-    },
-    _after: function (extraBehavior) {
-      return function (original) {
-        return function () {
-          var returnValue = original.apply(this, arguments);
-          extraBehavior.apply(this, arguments);
-          return returnValue
-        }
-      }
     }
   };
 
@@ -103,34 +88,24 @@ var Monkey = (function (config) {
 
 var patchTarget = {
   sum: function (a, b) {
-    console.log('Line: 0');
+    console.log('-------Line: 0-------');
     console.log('Line: 1');
     console.log('Line: 2');
     console.log('Line: 3');
     console.log('sum! (line 4)');
-    console.log('Line: 5');
+    console.log('-------Line: 5-------');
     return a + b;
   }
 };
 
 function doItBefore(cb) {
   console.log('before');
-  if (cb) cb();
+  //if (cb) cb();
 }
 
 function doItAfter(cb) {
   console.log('after');
-  if (cb) cb();
-}
-
-function doAtFirstLine(cb) {
-  console.log('First(1) line');
-  if (cb) cb();
-}
-
-function doAtFifthLine(cb) {
-  console.log('Fifth(5) line');
-  if (cb) cb();
+  //if (cb) cb();
 }
 
 var sumMonkey = new Monkey({
@@ -138,9 +113,10 @@ var sumMonkey = new Monkey({
   method: 'sum',
   before: doItBefore,
   after: doItAfter,
-  1: doAtFirstLine,
-  5: doAtFifthLine
+  1: 'console.log(\'-> injection on line 1\')',
+  5: 'console.log(\'-> injection on line 5\')'
 });
 
-var result = sumMonkey.hack();
-console.log(result);
+sumMonkey.hack();
+var result = patchTarget.sum(1, 2);
+console.log('result:' + result);
