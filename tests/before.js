@@ -1,63 +1,55 @@
 'use strict';
 
 var expect = require('chai').expect;
-var monkKeyPatch = require('../dist/monk-key-patch.js');
+var Monkey = require('../src/index.js');
 
-var obj;
-
-// var patchTarget = {
-//   sum: function (a, b) {
-//     console.log('-------Line: 0-------');
-//     console.log('Line: 1');
-//     console.log('Line: 2');
-//     console.log('Line: 3');
-//     console.log('sum! (line 4)');
-//     console.log('-------Line: 5-------');
-//     return a + b;
-//   }
-// };
-
-// function doItBefore(cb) {
-//   console.log('before');
-//   //if (cb) cb();
-// }
-//
-// function doItAfter(cb) {
-//   console.log('after');
-//   //if (cb) cb();
-// }
-//
-// var sumMonkey = new Monkey({
-//   obj: patchTarget,
-//   method: 'sum',
-//   before: doItBefore,
-//   after: doItAfter,
-//   1: 'console.log(\'-> injection on line 1\')',
-//   5: 'console.log(\'-> injection on line 5\');\n a +=a; \n console.log(\'end of injection(5) ->\')'
-// });
-//
-// sumMonkey.hack();
-// var result = patchTarget.sum(1, 2);
-// console.log('result:' + result);
+var patchTarget;
 
 beforeEach(function () {
-  obj = {
-    val: 0,
-    closureVal: function () {
-      var a = 1;
-      return a + this.val;
+  patchTarget = {
+    property: '',
+    sum: function (a, b) {
+      this.property += '-------Line: 0-------\n';
+      this.property += 'Line: 1\n';
+      this.property += 'Line: 2\n';
+      this.property += 'Line: 3\n';
+      this.property += 'sum! (line 4)\n';
+      this.property += '-------Line: 5-------\n';
+      return a + b;
     }
   };
 });
 
 describe('Before tests.', function () {
   it('Patch value from closure.', function () {
-    expect(obj.closureVal()).equal(1);
+    expect(patchTarget.sum(1, 1)).equal(2);
 
-    // monkKeyPatch.override(obj, 'closureVal', monkKeyPatch.before(function () {
-    //   this.val = 1;
-    // }));
-    //
-    // expect(obj.closureVal()).equal(2);
+    var lineOneInjectionStr = 'this.property += \'-> injection on line 1\';\n';
+    var lineFiveInjectionStr =
+        'this.property += \'-> injection on line 5\';\n' +
+        ' a += 1;\n' +
+        'this.property += \'end of injection(5) ->\';\n';
+
+    function doItBefore(cb) {
+      //TODO (S.Panfilov) add support of callbacks
+      this.property += '!--before--!';
+      //if (cb) cb();
+    }
+
+    function doItAfter(cb) {
+      this.property += '!--after---!';
+      //if (cb) cb();
+    }
+
+    new Monkey({
+      obj: patchTarget,
+      method: 'sum',
+      before: doItBefore,
+      after: doItAfter,
+      1: lineOneInjectionStr,
+      5: lineFiveInjectionStr
+    });
+
+    expect(patchTarget.sum(1, 1)).equal(3);
   });
 });

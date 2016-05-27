@@ -30,10 +30,11 @@ var Monkey = (function (config) {
   var isBefore = !!config.before;
   var isAfter = !!config.after;
 
-  var exports = {
+  var methods = {
     hack: function () {
       this._override(function (original) {
         return function () {
+          //TODO (S.Panfilov) add support of calbacks instead of args for before and after
           if (isBefore) config.before.apply(this, arguments);
           var returnValue = original.apply(this, arguments);
           if (isAfter) config.after.apply(this, arguments);
@@ -64,13 +65,16 @@ var Monkey = (function (config) {
         arr.splice(lineKey, 0, config[lineKey]);
       }
       var str = arr.join(config.linesDelimiter);
-
+      //TODO (S.Panfilov) add args parsing. Urgent!!!!!!!
       return new Function('a', 'b', str); //a -is our argument for "[method]" func
+    },
+    restore: function() {
+      //TODO (S.Panfilov) 
     }
   };
 
-  //Support of node.js
-  if (typeof module === 'object' && module.exports) module.exports = exports;
-
-  return exports;
+  return methods.hack();
 });
+
+//Support of node.js
+if (typeof module === 'object' && module.exports) module.exports = Monkey;
