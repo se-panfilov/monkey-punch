@@ -1,6 +1,5 @@
-'use strict';
-
 var Monkey = (function (config) {
+  'use strict';
 
   if (!config) console.log('no config error');
 
@@ -101,7 +100,7 @@ var sumMonkey = new Monkey({
   before: doItBefore,
   after: doItAfter,
   1: 'console.log(\'-> injection on line 1\')',
-  5: 'console.log(\'-> injection on line 5\');\n a +=a; \n console.log(\'end of injection ->\')'
+  5: 'console.log(\'-> injection on line 5\');\n a +=a; \n console.log(\'end of injection(5) ->\')'
 });
 
 sumMonkey.hack();
