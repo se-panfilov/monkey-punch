@@ -55,6 +55,12 @@ var Monkey = (function (config) {
     },
     _modifyLines: function (config) {
       var arr = config.obj[config.method].toString().split(config.linesDelimiter);
+
+      //TODO (S.Panfilov) remove empty lines
+      // for (var i = config._linesKeys.length - 1; i >= 0; i--) {
+      //   arr.splice(i, 1);
+      // }
+
       // Remove first line: "function (a) {" (to be honest we should first parse and remember args)
       arr.splice(0, 1);
       // Remove last line: "}"
@@ -64,6 +70,7 @@ var Monkey = (function (config) {
         var lineKey = config._linesKeys[i];
         arr.splice(lineKey, 0, config[lineKey]);
       }
+      
       var str = arr.join(config.linesDelimiter);
       //TODO (S.Panfilov) add args parsing. Urgent!!!!!!!
       return new Function('a', 'b', str); //a -is our argument for "[method]" func

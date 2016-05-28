@@ -1,4 +1,4 @@
-Lib for greceful Monkey-patching.
+Lib for graceful Monkey-patching.
 
 [Monkey-patching][1] is a way to override or extend the behaviour of a method without changing its original source code.
 
