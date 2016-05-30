@@ -4,9 +4,8 @@ var expect = require('chai').expect;
 var Monkey = require('../src/index.js');
 
 var patchTarget;
-
 var bodyStrArr;
-var beforeStr = '!--before--!';
+var afterStr = '!--after---!';
 
 beforeEach(function () {
   bodyStrArr = [
@@ -40,48 +39,48 @@ function insertAt(arr, lineNumber, value) {
   arr.splice(lineNumber, 0, value);
 }
 
-describe('Before tests.', function () {
+describe('After tests.', function () {
 
-  it('Before with no effect to result.', function () {
+  it('After with no effect to result.', function () {
     var pureResult = patchTarget.sum(2, 2);
     expect(pureResult).equal(4);
     expect(patchTarget.property).deep.equal(bodyStrArr);
     patchTarget.property = [];
 
-    function doItBefore(cb) {
-      this.property.push(beforeStr);
+    function doItAfter() {
+      this.property.push(afterStr);
     }
 
     new Monkey({
       obj: patchTarget,
       method: 'sum',
-      before: doItBefore
+      after: doItAfter
     });
 
     var expectedArr = bodyStrArr.slice(0);
-    insertAt(expectedArr, 0, beforeStr);
+    insertAt(expectedArr, 6, afterStr);
 
     var result = patchTarget.sum(2, 2);
     expect(result).equal(4);
     expect(patchTarget.property).deep.equal(expectedArr);
   });
 
-  it('Make effect to result(closure).', function () {
+  it('Make sure that no effect to result(closure).', function () {
     var pureResult = patchTarget.closureSum(2);
     expect(pureResult).equal(3);
 
-    function doItBefore() {
+    function doItAfter() {
       this.closureVal = 2
     }
 
     new Monkey({
       obj: patchTarget,
       method: 'closureSum',
-      before: doItBefore
+      after: doItAfter
     });
 
     var result = patchTarget.closureSum(2);
-    expect(result).equal(4);
+    expect(result).equal(3);
   });
 
   it('Check restore after effect to result.', function () {
@@ -91,18 +90,18 @@ describe('Before tests.', function () {
     expect(patchTarget.property).deep.equal(bodyStrArr);
     patchTarget.property = [];
 
-    function doItBefore(cb) {
+    function doItAfter(cb) {
       this.property.push(beforeStr);
     }
 
     var monkey = new Monkey({
       obj: patchTarget,
       method: 'sum',
-      before: doItBefore
+      after: doItAfter
     });
 
     var expectedArr = bodyStrArr.slice(0);
-    insertAt(expectedArr, 0, beforeStr);
+    insertAt(expectedArr, 0, afterStr);
 
     var affectedResult = patchTarget.sum(2, 2);
     expect(affectedResult).equal(4);
@@ -114,48 +113,5 @@ describe('Before tests.', function () {
     expect(restoredResult).equal(4);
     expect(patchTarget.property).deep.equal(bodyStrArr);
   });
-
-
-  // it('Patch value from closure.', function () {
-  //   var pureResult = patchTarget.sum(1, 1);
-  //   expect(pureResult).equal(2);
-  //   patchTarget.property = '';
-  //
-  //   var lineOneInjectionStr = 'this.property += \'-> injection on line 1\';';
-  //   var lineFiveInjectionStr =
-  //       'this.property += \'-> injection on line 5\';' +
-  //       ' a += 1;\n' +
-  //       'this.property += \'end of injection(5) ->\';';
-  //
-  //   var expectedStr;
-  //   expectedStr = insertString(bodyStr, 5, lineFiveInjectionStr);
-  //   expectedStr = insertString(expectedStr, 1, lineOneInjectionStr);
-  //   expectedStr = insertString(expectedStr, 0, '!--before--!\n');
-  //   expectedStr += '!--after---!\n';
-  //
-  //   function doItBefore(cb) {
-  //     this.property += '!--before--!\n';
-  //     //if (cb) cb();
-  //   }
-  //
-  //   function doItAfter(cb) {
-  //     this.property += '!--after---!\n';
-  //     //if (cb) cb();
-  //   }
-  //
-  //   new Monkey({
-  //     obj: patchTarget,
-  //     method: 'sum',
-  //     before: doItBefore,
-  //     after: doItAfter,
-  //     1: lineOneInjectionStr,
-  //     5: lineFiveInjectionStr
-  //   });
-  //
-  //   //expect(patchTarget.property).equal(bodyStr);
-  //   var patchedResult = patchTarget.sum(1, 1);
-  //   expect(patchedResult).equal(3);
-  //   console.log(patchTarget.property);
-  //   expect(patchTarget.property).equal(expectedStr);
-  // });
+  
 });
