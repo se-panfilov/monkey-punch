@@ -39,11 +39,18 @@ function insertAt(arr, lineNumber, value) {
   arr.splice(lineNumber, 0, value);
 }
 
+function copyArr(arr) {
+  return arr.slice(0);
+}
+
 describe('After tests.', function () {
 
   it('After with no effect to result.', function () {
+    var lastLine = bodyStrArr.length;
+    var expectedPureResult = 4;
+
     var pureResult = patchTarget.sum(2, 2);
-    expect(pureResult).equal(4);
+    expect(pureResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(bodyStrArr);
     patchTarget.property = [];
 
@@ -57,17 +64,19 @@ describe('After tests.', function () {
       after: doItAfter
     });
 
-    var expectedArr = bodyStrArr.slice(0);
-    insertAt(expectedArr, 6, afterStr);
+    var expectedArr = copyArr(bodyStrArr);
+    insertAt(expectedArr, lastLine, afterStr);
 
     var result = patchTarget.sum(2, 2);
-    expect(result).equal(4);
+    expect(result).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(expectedArr);
   });
 
   it('Make sure that no effect to result(closure).', function () {
+    var expectedPureResult = 3;
+
     var pureResult = patchTarget.closureSum(2);
-    expect(pureResult).equal(3);
+    expect(pureResult).equal(expectedPureResult);
 
     function doItAfter() {
       this.closureVal = 2
@@ -80,17 +89,19 @@ describe('After tests.', function () {
     });
 
     var result = patchTarget.closureSum(2);
-    expect(result).equal(3);
+    expect(result).equal(expectedPureResult);
   });
 
   it('Check restore after effect to result.', function () {
-    //TODO (S.Panfilov) check this flow
+    var expectedPureResult = 4;
+    var lastLine = bodyStrArr.length;
+
     var pureResult = patchTarget.sum(2, 2);
-    expect(pureResult).equal(4);
+    expect(pureResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(bodyStrArr);
     patchTarget.property = [];
 
-    function doItAfter(cb) {
+    function doItAfter() {
       this.property.push(afterStr);
     }
 
@@ -100,18 +111,20 @@ describe('After tests.', function () {
       after: doItAfter
     });
 
-    var expectedArr = bodyStrArr.slice(0);
-    insertAt(expectedArr, 0, afterStr);
+    var expectedArr = copyArr(bodyStrArr);
+    insertAt(expectedArr, lastLine, afterStr);
 
     var affectedResult = patchTarget.sum(2, 2);
-    expect(affectedResult).equal(4);
+    expect(affectedResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(expectedArr);
+    patchTarget.property = [];
 
     monkey.restore();
 
+    expect(typeof patchTarget.sum).equal('function');
     var restoredResult = patchTarget.sum(2, 2);
-    expect(restoredResult).equal(4);
+    expect(restoredResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(bodyStrArr);
   });
-  
+
 });

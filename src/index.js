@@ -12,6 +12,7 @@ var Monkey = (function (config) {
   var numberSort = function (a, b) {
     return a > b
   };
+
   config._linesKeys = config._keys.filter(isFinite).sort(numberSort);
   config._minLineKey = Math.min.apply(null, config._linesKeys);
   config._maxLineKey = Math.max.apply(null, config._linesKeys);
@@ -30,19 +31,9 @@ var Monkey = (function (config) {
   var isBefore = !!config.before;
   var isAfter = !!config.after;
 
-  var methods = {
-    hack: function () {
-      this._override(function (original) {
-        return function () {
-          //TODO (S.Panfilov) add support of calbacks instead of args for before and after
-          if (isBefore) config.before.apply(this, arguments);
-          var returnValue = original.apply(this, arguments);
-          if (isAfter) config.after.apply(this, arguments);
-
-          return returnValue;
-        }
-      });
-    },
+  var exports = {
+    //TODO (S.Panfilov) save original function here
+    original: null,
     _override: function (callback) {
       var object = config.obj;
       var method = config.method;
@@ -55,12 +46,7 @@ var Monkey = (function (config) {
     },
     _modifyLines: function (config) {
       var arr = config.obj[config.method].toString().split(config.linesDelimiter);
-
-      //TODO (S.Panfilov) remove empty lines
-      // for (var i = config._linesKeys.length - 1; i >= 0; i--) {
-      //   arr.splice(i, 1);
-      // }
-
+      
       // Remove first line: "function (a) {" (to be honest we should first parse and remember args)
       arr.splice(0, 1);
       // Remove last line: "}"
@@ -70,17 +56,30 @@ var Monkey = (function (config) {
         var lineKey = config._linesKeys[i];
         arr.splice(lineKey, 0, config[lineKey]);
       }
-      
+
       var str = arr.join(config.linesDelimiter);
       //TODO (S.Panfilov) add args parsing. Urgent!!!!!!!
       return new Function('a', 'b', str); //a -is our argument for "[method]" func
     },
-    restore: function() {
-      //TODO (S.Panfilov) 
+    restore: function () {
+      config.obj[config.method] = this.original;
     }
   };
 
-  return methods.hack();
+  (function main() {
+    exports._override(function (original) {
+      exports.original = original;
+      return function () {
+        if (isBefore) config.before.apply(this, arguments);
+        var returnValue = original.apply(this, arguments);
+        if (isAfter) config.after.apply(this, arguments);
+
+        return returnValue;
+      }
+    });
+  })();
+
+  return exports;
 });
 
 //Support of node.js

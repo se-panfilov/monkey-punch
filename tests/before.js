@@ -40,15 +40,22 @@ function insertAt(arr, lineNumber, value) {
   arr.splice(lineNumber, 0, value);
 }
 
+function copyArr(arr) {
+  return arr.slice(0);
+}
+
 describe('Before tests.', function () {
 
   it('Before with no effect to result.', function () {
+    var firstLine = 0;
+    var expectedPureResult = 4;
+
     var pureResult = patchTarget.sum(2, 2);
-    expect(pureResult).equal(4);
+    expect(pureResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(bodyStrArr);
     patchTarget.property = [];
 
-    function doItBefore(cb) {
+    function doItBefore() {
       this.property.push(beforeStr);
     }
 
@@ -58,17 +65,20 @@ describe('Before tests.', function () {
       before: doItBefore
     });
 
-    var expectedArr = bodyStrArr.slice(0);
-    insertAt(expectedArr, 0, beforeStr);
+    var expectedArr = copyArr(bodyStrArr);
+    insertAt(expectedArr, firstLine, beforeStr);
 
     var result = patchTarget.sum(2, 2);
-    expect(result).equal(4);
+    expect(result).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(expectedArr);
   });
 
   it('Make effect to result(closure).', function () {
+    var expectedPureResult = 3;
+    var expectedModyfiedResult = 4;
+
     var pureResult = patchTarget.closureSum(2);
-    expect(pureResult).equal(3);
+    expect(pureResult).equal(expectedPureResult);
 
     function doItBefore() {
       this.closureVal = 2
@@ -81,13 +91,15 @@ describe('Before tests.', function () {
     });
 
     var result = patchTarget.closureSum(2);
-    expect(result).equal(4);
+    expect(result).equal(expectedModyfiedResult);
   });
 
   it('Check restore after effect to result.', function () {
-    //TODO (S.Panfilov) check this flow
+    var firstLine = 0;
+    var expectedPureResult = 4;
+
     var pureResult = patchTarget.sum(2, 2);
-    expect(pureResult).equal(4);
+    expect(pureResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(bodyStrArr);
     patchTarget.property = [];
 
@@ -101,17 +113,19 @@ describe('Before tests.', function () {
       before: doItBefore
     });
 
-    var expectedArr = bodyStrArr.slice(0);
-    insertAt(expectedArr, 0, beforeStr);
+    var expectedArr = copyArr(bodyStrArr);
+    insertAt(expectedArr, firstLine, beforeStr);
 
     var affectedResult = patchTarget.sum(2, 2);
-    expect(affectedResult).equal(4);
+    expect(affectedResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(expectedArr);
+    patchTarget.property = [];
 
     monkey.restore();
 
+    expect(typeof patchTarget.sum).equal('function');
     var restoredResult = patchTarget.sum(2, 2);
-    expect(restoredResult).equal(4);
+    expect(restoredResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(bodyStrArr);
   });
 
