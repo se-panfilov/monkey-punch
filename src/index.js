@@ -59,7 +59,8 @@ var Monkey = (function (config) {
 
       var str = arr.join(config.linesDelimiter);
       var args = this._getParamNames(config.method);
-      return new Function(args, str); //a -is our argument for "[method]" func
+      //TODO (S.Panfilov) take care about functions name
+      return new Function(args, str);
     },
     _getParamNames: function (func) {
       var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
@@ -96,39 +97,18 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 
 
 // new Monkey({
-//     obj: patchTarget,
-//     method: 'sum',
-//     before: doItBefore,
-//     after: doItAfter,
-//     1: lineOneInjectionStr,
-//     5: lineFiveInjectionStr
-//   });
-
-// or
-
-// new Monkey({
 //   obj: patchTarget,
 //   method: 'sum',
 //   before: doItBefore,
 //   after: doItAfter,
 //   body: {
 //     regexps: {
-//       beforeMatch: {
-//         regexp: '[^\s]\{',
-//         val: addSpace
-//       },
-//       afterMatch: {
-//         regexp: '\)\n',
-//         val: addSemiQuote
-//       }
+//       '\)\n': addSemiQuote
 //     },
-//     chars: {
-//       5: columnFiveInjectionStr,
-//       18: columnEighteenInjectionStr
-//     },
-//     lines: {
+//     position: {
 //       1: lineOneInjectionStr,
-//       5: lineFiveInjectionStr
+//       5: lineFiveInjectionStr,
+//       '6,10': linesixColumnTenInjectionStr
 //     }
 //   }
 // });
