@@ -107,10 +107,21 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 // or
 
 // new Monkey({
-//     obj: patchTarget,
-//     method: 'sum',
-//     before: doItBefore,
-//     after: doItAfter,
+//   obj: patchTarget,
+//   method: 'sum',
+//   before: doItBefore,
+//   after: doItAfter,
+//   body: {
+//     regexps: {
+//       beforeMatch: {
+//         regexp: '[^\s]\{',
+//         val: addSpace
+//       },
+//       afterMatch: {
+//         regexp: '\)\n',
+//         val: addSemiQuote
+//       }
+//     },
 //     chars: {
 //       5: columnFiveInjectionStr,
 //       18: columnEighteenInjectionStr
@@ -118,5 +129,6 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //     lines: {
 //       1: lineOneInjectionStr,
 //       5: lineFiveInjectionStr
-//      }
-//   });
+//     }
+//   }
+// });
