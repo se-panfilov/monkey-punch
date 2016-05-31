@@ -75,7 +75,7 @@ describe('Before tests.', function () {
 
   it('Make effect to result(closure).', function () {
     var expectedPureResult = 3;
-    var expectedModyfiedResult = 4;
+    var expectedModifiedResult = 4;
 
     var pureResult = patchTarget.closureSum(2);
     expect(pureResult).equal(expectedPureResult);
@@ -91,7 +91,7 @@ describe('Before tests.', function () {
     });
 
     var result = patchTarget.closureSum(2);
-    expect(result).equal(expectedModyfiedResult);
+    expect(result).equal(expectedModifiedResult);
   });
 
   it('Check restore after effect to result.', function () {

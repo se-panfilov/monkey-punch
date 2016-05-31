@@ -46,8 +46,8 @@ var Monkey = (function (config) {
     },
     _modifyLines: function (config) {
       var arr = config.obj[config.method].toString().split(config.linesDelimiter);
-      
-      // Remove first line: "function (a) {" (to be honest we should first parse and remember args)
+
+      // Remove first line: "function (a) {"
       arr.splice(0, 1);
       // Remove last line: "}"
       arr.splice(arr.length - 1, 1);
@@ -58,8 +58,17 @@ var Monkey = (function (config) {
       }
 
       var str = arr.join(config.linesDelimiter);
-      //TODO (S.Panfilov) add args parsing. Urgent!!!!!!!
-      return new Function('a', 'b', str); //a -is our argument for "[method]" func
+      var args = this._getParamNames(config.method);
+      return new Function(args, str); //a -is our argument for "[method]" func
+    },
+    _getParamNames: function (func) {
+      var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
+      var ARGUMENT_NAMES = /([^\s,]+)/g;
+
+      var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+      var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+
+      return result || [];
     },
     restore: function () {
       config.obj[config.method] = this.original;
@@ -84,3 +93,30 @@ var Monkey = (function (config) {
 
 //Support of node.js
 if (typeof module === 'object' && module.exports) module.exports = Monkey;
+
+
+// new Monkey({
+//     obj: patchTarget,
+//     method: 'sum',
+//     before: doItBefore,
+//     after: doItAfter,
+//     1: lineOneInjectionStr,
+//     5: lineFiveInjectionStr
+//   });
+
+// or
+
+// new Monkey({
+//     obj: patchTarget,
+//     method: 'sum',
+//     before: doItBefore,
+//     after: doItAfter,
+//     chars: {
+//       5: columnFiveInjectionStr,
+//       18: columnEighteenInjectionStr
+//     },
+//     lines: {
+//       1: lineOneInjectionStr,
+//       5: lineFiveInjectionStr
+//      }
+//   });
