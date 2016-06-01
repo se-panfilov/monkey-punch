@@ -84,6 +84,21 @@ var Monkey = (function (config) {
       if (bodyConfig.regexps)  fnArr = this._modifyAtRegexp(fnArr, bodyConfig.regexps);
       return this._makeFn(fnArr, config.linesDelimiter)
     },
+    _injectLine: function (positionKey, positionVal) {
+      var line = this._getLineNumber(positionKey);
+
+      arr.splice(line, 0, positionVal);
+      return arr;
+    },
+    _appendLine: function (positionKey, positionVal) {
+      var line = this._getLineNumber(positionKey);
+      var column = this._getColumnNumber(positionKey);
+
+      if (column > arr[line].length) column = arr.length;
+
+      arr[line] = arr[line].slice(0, column) + positionVal + arr[line].slice(column);
+      return arr;
+    },
     _modifyAtPositions: function (positions) {
       //TODO (S.Panfilov)
       //   positions: {
@@ -97,15 +112,19 @@ var Monkey = (function (config) {
           // positionConfig[key]
         }
       }
-      positions = this._sortNumberArr(positions);
 
-      // for (var i = positions.length - 1; i >= 0; i--) {
-      //   var lineKey = positions[i];
-      //   arr.splice(lineKey, 0, config[lineKey]);
-      // }
+      var positionsKeys = this._sortNumberArr(Object.keys(positions));
+
+      for (var i = positionsKeys.length - 1; i >= 0; i--) {
+        var positionKey = i;
+        var positionVal = positions[i];
+        //TODO (S.Panfilov) cur work point
+        this._injectLine(positionKey, positionVal);
+        this._appendLine(positionKey, positionVal);
+      }
 
     },
-    _modifyAtRegexp: function (regexpsConfig) {
+    _modifyAtRegexp: function (regexps) {
       //TODO (S.Panfilov)
       //   regexps: {
       //     '\)\n': addSemiQuote
