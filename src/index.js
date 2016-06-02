@@ -97,6 +97,8 @@ var Monkey = (function (config) {
       return fnArr;
     },
     _wrapRegex: function (str) {
+
+      //TODO (S.Panfilov) this woudn't work cause of '/g', '/i', etc. Should make new RegExp perhaps
       var isWrapped = (str.indexOf('/') === 0 && str.lastIndexOf('/'));
 
       return (isWrapped) ? str : ('/' + str + '/');
@@ -176,7 +178,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //TODO (S.Panfilov) Add support for one-liners
 //TODO (S.Panfilov) Add support for functions as well as strings in body params
 
-// new Monkey({
+// var myMonkey = new Monkey({
 //   obj: patchTarget,
 //   method: 'sum',
 //   linesDelimiter: '\n',
@@ -184,15 +186,19 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //   after: doItAfter,
 //   body: {
 //     regexps: {
-//       '\)\n': addSemiQuoteFn
-//       '\{': ' ' //add space before each'{'
+//       '/\)\n/g': addSemiQuoteFn // add ';' after each ')'
+//       '/\{/g': ' ' // add space before each'{'
 //     },
 //     positions: {
-//       1: 'injection to line one',
-//       5: 'injection to line five',
+//       1: '// injection to line one',
+//       5: '// injection to line five',
 //       2: lineTwoInjectionFunc,
-//       '6,10': 'Injection to line 6 column 10'
+//       '6,10': '// Injection to line 6 column 10'
 //       '2,3': lineTwoColumnThreeInjectionFunc
 //     }
 //   }
 // });
+
+// ...
+// myMonkey.restore();
+// ...

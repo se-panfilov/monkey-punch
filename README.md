@@ -13,14 +13,14 @@ var myMonkey = new Monkey({
   after: doItAfter,
   body: {
     regexps: {
-      '\)\n': addSemiQuoteFn
-      '\{': ' ' //add space before each'{'
+      '/\)\n/g': addSemiQuoteFn // add ';' after each ')'
+      '/\{/g': ' ' // add space before each'{'
     },
     positions: {
-      1: 'injection to line one',
-      5: 'injection to line five',
+      1: '// injection to line one',
+      5: '// injection to line five',
       2: lineTwoInjectionFunc,
-      '6,10': 'Injection to line 6 column 10'
+      '6,10': '// Injection to line 6 column 10'
       '2,3': lineTwoColumnThreeInjectionFunc
     }
   }
@@ -28,8 +28,8 @@ var myMonkey = new Monkey({
 
 
 //...
-
 myMonkey.restore();
+// ...
 ```
 
 ## References
