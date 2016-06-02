@@ -8,15 +8,6 @@ var Monkey = (function (config) {
   // //TODO (S.Panfilov) perhaps should have count without first and last lines (didn't sure)
   // var linesCount = methodArr.length;
 
-  config._keys = Object.keys(config);
-  var numberSort = function (a, b) {
-    return a > b
-  };
-
-  // config._linesKeys = config._keys.filter(isFinite).sort(numberSort);
-  // config._minLineKey = Math.min.apply(null, config._linesKeys);
-  // config._maxLineKey = Math.max.apply(null, config._linesKeys);
-
   //TODO (S.Panfilov) return errors for out of range
   // if (config._maxLineKey > linesCount) {
   //   console.error('Error: line number too big');
@@ -28,7 +19,6 @@ var Monkey = (function (config) {
   //   return;
   // }
 
-  config._isLinesPatches = config._linesKeys.length > 0;
   var isBefore = !!config.before;
   var isAfter = !!config.after;
 
@@ -37,11 +27,6 @@ var Monkey = (function (config) {
     _override: function (callback) {
       var object = config.obj;
       var method = config.method;
-
-      if (config._isLinesPatches) {
-        object[method] = this._modifyLines(config);
-      }
-
       object[method] = callback(object[method]);
     },
     _getLineNumber: function (key) {
@@ -72,9 +57,12 @@ var Monkey = (function (config) {
       return fnArr;
     },
     _makeFn: function (strArr, linesDelimiter) {
+      var name = this._getFnName(config.method);
       var str = strArr.join(linesDelimiter);
       var args = this._getParamNames(config.method);
-      //TODO (S.Panfilov) take care about functions name
+
+      //this is for named function
+      if (name) str = 'return function ' + name + ' () {' + str +'};';
       return new Function(args, str);
     },
     _modifyBody: function (bodyConfig) {
@@ -84,45 +72,31 @@ var Monkey = (function (config) {
       if (bodyConfig.regexps)  fnArr = this._modifyAtRegexp(fnArr, bodyConfig.regexps);
       return this._makeFn(fnArr, config.linesDelimiter)
     },
-    _injectLine: function (positionKey, positionVal) {
-      var line = this._getLineNumber(positionKey);
-
-      arr.splice(line, 0, positionVal);
-      return arr;
-    },
-    _appendLine: function (positionKey, positionVal) {
-      var line = this._getLineNumber(positionKey);
-      var column = this._getColumnNumber(positionKey);
+    _injectLine: function (arr, position, val) {
+      var line = this._getLineNumber(position);
+      var column = this._getColumnNumber(position);
 
       if (column > arr[line].length) column = arr.length;
 
-      arr[line] = arr[line].slice(0, column) + positionVal + arr[line].slice(column);
-      return arr;
-    },
-    _modifyAtPositions: function (positions) {
-      //TODO (S.Panfilov)
-      //   positions: {
-      //     1: lineOneInjectionStr,
-      //     5: lineFiveInjectionStr,
-      //     '6,10': lineSixColumnTenInjectionStr
-      //   }
-
-      for (var key in positions) {
-        if (positions.hasOwnProperty(key)) {
-          // positionConfig[key]
-        }
+      if (column > 0) {
+        arr.splice(line, 0, val);
+      } else {
+        arr[line] = arr[line].slice(0, column) + val + arr[line].slice(column);
       }
 
+      return arr;
+    },
+    _modifyAtPositions: function (fnArr, positions) {
       var positionsKeys = this._sortNumberArr(Object.keys(positions));
 
       for (var i = positionsKeys.length - 1; i >= 0; i--) {
         var positionKey = i;
         var positionVal = positions[i];
         //TODO (S.Panfilov) cur work point
-        this._injectLine(positionKey, positionVal);
-        this._appendLine(positionKey, positionVal);
+        this._injectLine(fnArr, positionKey, positionVal);
       }
 
+      return fnArr;
     },
     _modifyAtRegexp: function (regexps) {
       //TODO (S.Panfilov)
@@ -132,29 +106,17 @@ var Monkey = (function (config) {
 
 
     },
-    // _modifyLines: function (config) {
-    //   var arr = config.obj[config.method].toString().split(config.linesDelimiter);
-    //
-    //   // Remove first line: "function (a) {"
-    //   arr.splice(0, 1);
-    //   // Remove last line: "}"
-    //   arr.splice(arr.length - 1, 1);
-    //
-    //   for (var i = config._linesKeys.length - 1; i >= 0; i--) {
-    //     var lineKey = config._linesKeys[i];
-    //     arr.splice(lineKey, 0, config[lineKey]);
-    //   }
-    //
-    //   var str = arr.join(config.linesDelimiter);
-    //   var args = this._getParamNames(config.method);
-    //   //TODO (S.Panfilov) take care about functions name
-    //   return new Function(args, str);
-    // },
-    _getParamNames: function (func) {
+    _getFnName: function (fn) {
+      if (fn.name) return fn.name;
+
+      var regexp = /^function\s+([\w\$]+)\s*\(/;
+      return regexp.exec(fn.toString())[1];
+    },
+    _getParamNames: function (fn) {
       var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
       var ARGUMENT_NAMES = /([^\s,]+)/g;
 
-      var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+      var fnStr = fn.toString().replace(STRIP_COMMENTS, '');
       var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
 
       return result || [];
