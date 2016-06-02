@@ -5,14 +5,31 @@ Lib for graceful Monkey-patching.
 ### Override
 
 ```javascript
-new Monkey({
-      obj: patchTarget,
-      method: 'sum',
-      before: doItBefore,
-      after: doItAfter,
-      1: lineOneInjectionStr,
-      5: lineFiveInjectionStr
-    });
+var myMonkey = new Monkey({
+  obj: patchTarget,
+  method: 'sum',
+  linesDelimiter: '\n',
+  before: doItBefore,
+  after: doItAfter,
+  body: {
+    regexps: {
+      '\)\n': addSemiQuoteFn
+      '\{': ' ' //add space before each'{'
+    },
+    positions: {
+      1: 'injection to line one',
+      5: 'injection to line five',
+      2: lineTwoInjectionFunc,
+      '6,10': 'Injection to line 6 column 10'
+      '2,3': lineTwoColumnThreeInjectionFunc
+    }
+  }
+});
+
+
+//...
+
+myMonkey.restore();
 ```
 
 ## References
