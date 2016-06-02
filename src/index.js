@@ -4,9 +4,6 @@ var Monkey = (function (config) {
   if (!config) console.error('Error: no config');
 
   config.linesDelimiter = config.linesDelimiter || '\n';
-  // var methodArr = config.obj[config.method].toString().split(config.linesDelimiter);
-  // //TODO (S.Panfilov) perhaps should have count without first and last lines (didn't sure)
-  // var linesCount = methodArr.length;
 
   //TODO (S.Panfilov) return errors for out of range
   // if (config._maxLineKey > linesCount) {
@@ -50,20 +47,21 @@ var Monkey = (function (config) {
     },
     _getStrArr: function (fn, linesDelimiter) {
       var fnArr = fn.toString().split(linesDelimiter);
+      //TODO (S.Panfilov) check this for one-liner
       // Remove first line: "function (a) {"
       fnArr.splice(0, 1);
       // Remove last line: "}"
       fnArr.splice(fnArr.length - 1, 1);
       return fnArr;
     },
-    _makeFn: function (strArr, linesDelimiter) {
-      var name = this._getFnName(config.method);
-      var str = strArr.join(linesDelimiter);
-      var args = this._getParamNames(config.method);
+    _makeFn: function (fnArr, linesDelimiter) {
+      var fnName = this._getFnName(config.method);
+      var fnStr = fnArr.join(linesDelimiter);
+      var fnArgs = this._getParamNames(config.method);
 
       //this is for named function
-      if (name) str = 'return function ' + name + ' () {' + str +'};';
-      return new Function(args, str);
+      if (fnName) fnStr = 'return function ' + fnName + ' () {' + fnStr + '};';
+      return new Function(fnArgs, fnStr);
     },
     _modifyBody: function (bodyConfig) {
       var fnArr = this._getStrArr(config.obj[config.method], config.linesDelimiter);
@@ -98,12 +96,40 @@ var Monkey = (function (config) {
 
       return fnArr;
     },
-    _modifyAtRegexp: function (regexps) {
-      //TODO (S.Panfilov)
-      //   regexps: {
-      //     '\)\n': addSemiQuote
-      //   },
+    _wrapRegex: function (str) {
+      var isWrapped = (str.indexOf('/') === 0 && str.lastIndexOf('/'));
 
+      return (isWrapped) ? str : ('/' + str + '/');
+    },
+    _modifyAtRegexp: function (fnArr, regexpObj, linesDelimiter) {
+      var fnStr = fnArr.join(linesDelimiter);
+
+      for (var regex in regexpObj) {
+        if (regexpObj.hasOwnProperty(regex)) {
+          var fnOrStr = regexpObj[regex];
+          if (typeof fnOrStr === 'function') {
+            //(asd.toString()).search(/\)\n/g)
+            var match;
+            var matchesArr = [];
+            while ((match = regex.exec(fnStr)) != null) {
+              matchesArr.push(match.index);
+            }
+
+            for (var i = 0; i < matchesArr.length; i++) {
+              var _match = matchesArr[i];
+              var positions = [{}];
+              positions[0][_match] = fnOrStr;
+              fnStr = (this._modifyAtPositions(this._getStrArr(fnStr), positions)).join(linesDelimiter);
+            }
+
+          } else { //string
+            fnStr.replace(this._wrapRegex(regex), fnOrStr);
+          }
+        }
+      }
+
+
+      return this._getStrArr(fnArr, config.linesDelimiter);
 
     },
     _getFnName: function (fn) {
@@ -146,6 +172,9 @@ var Monkey = (function (config) {
 //Support of node.js
 if (typeof module === 'object' && module.exports) module.exports = Monkey;
 
+//Roadmap:
+//TODO (S.Panfilov) Add support for one-liners
+//TODO (S.Panfilov) Add support for functions as well as strings in body params
 
 // new Monkey({
 //   obj: patchTarget,
@@ -155,12 +184,15 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //   after: doItAfter,
 //   body: {
 //     regexps: {
-//       '\)\n': addSemiQuote
+//       '\)\n': addSemiQuoteFn
+//       '\{': ' ' //add space before each'{'
 //     },
 //     positions: {
-//       1: lineOneInjectionStr,
-//       5: lineFiveInjectionStr,
-//       '6,10': lineSixColumnTenInjectionStr
+//       1: 'injection to line one',
+//       5: 'injection to line one',
+//       2: lineFiveInjectionFunc,
+//       '6,10': 'Injection to line 6 column 10'
+//       '2,3': lineTwoColumnThreeInjectionFunc
 //     }
 //   }
 // });
