@@ -1,11 +1,13 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Monkey = require('../src/index.js');
+var Monkey = require('../../src/index.js');
+var Utils = require('../utils');
 
 var patchTarget;
+
 var bodyStrArr;
-var afterStr = '!--after---!';
+var beforeStr = '!--before--!';
 
 beforeEach(function () {
   bodyStrArr = [
@@ -35,18 +37,10 @@ beforeEach(function () {
   };
 });
 
-function insertAt(arr, lineNumber, value) {
-  arr.splice(lineNumber, 0, value);
-}
+describe('Before tests.', function () {
 
-function copyArr(arr) {
-  return arr.slice(0);
-}
-
-describe('After tests.', function () {
-
-  it('After with no effect to result.', function () {
-    var lastLine = bodyStrArr.length;
+  it('Before with no effect to result.', function () {
+    var firstLine = 0;
     var expectedPureResult = 4;
 
     var pureResult = patchTarget.sum(2, 2);
@@ -54,65 +48,66 @@ describe('After tests.', function () {
     expect(patchTarget.property).deep.equal(bodyStrArr);
     patchTarget.property = [];
 
-    function doItAfter() {
-      this.property.push(afterStr);
+    function doItBefore() {
+      this.property.push(beforeStr);
     }
 
     new Monkey({
       obj: patchTarget,
       method: 'sum',
-      after: doItAfter
+      before: doItBefore
     });
 
-    var expectedArr = copyArr(bodyStrArr);
-    insertAt(expectedArr, lastLine, afterStr);
+    var expectedArr = Utils.copyArr(bodyStrArr);
+    Utils.insertAt(expectedArr, firstLine, beforeStr);
 
     var result = patchTarget.sum(2, 2);
     expect(result).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(expectedArr);
   });
 
-  it('Make sure that no effect to result(closure).', function () {
+  it('Make effect to result(closure).', function () {
     var expectedPureResult = 3;
+    var expectedModifiedResult = 4;
 
     var pureResult = patchTarget.closureSum(2);
     expect(pureResult).equal(expectedPureResult);
 
-    function doItAfter() {
+    function doItBefore() {
       this.closureVal = 2
     }
 
     new Monkey({
       obj: patchTarget,
       method: 'closureSum',
-      after: doItAfter
+      before: doItBefore
     });
 
     var result = patchTarget.closureSum(2);
-    expect(result).equal(expectedPureResult);
+    expect(result).equal(expectedModifiedResult);
   });
 
   it('Check restore after effect to result.', function () {
+    var firstLine = 0;
     var expectedPureResult = 4;
-    var lastLine = bodyStrArr.length;
 
     var pureResult = patchTarget.sum(2, 2);
     expect(pureResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(bodyStrArr);
     patchTarget.property = [];
 
-    function doItAfter() {
-      this.property.push(afterStr);
+    function doItBefore(cb) {
+      this.property.push(beforeStr);
     }
 
     var monkey = new Monkey({
       obj: patchTarget,
       method: 'sum',
-      after: doItAfter
+      before: doItBefore
     });
 
-    var expectedArr = copyArr(bodyStrArr);
-    insertAt(expectedArr, lastLine, afterStr);
+    var expectedArr = Utils.copyArr(bodyStrArr);
+    Utils.insertAt(expectedArr, firstLine, beforeStr);
 
     var affectedResult = patchTarget.sum(2, 2);
     expect(affectedResult).equal(expectedPureResult);
@@ -126,5 +121,4 @@ describe('After tests.', function () {
     expect(restoredResult).equal(expectedPureResult);
     expect(patchTarget.property).deep.equal(bodyStrArr);
   });
-
 });

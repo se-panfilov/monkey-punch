@@ -4,7 +4,7 @@
   "description": "Library for properly Monkey-patching",
   "main": "./dist/monk-key-patching.js",
   "scripts": {
-    "test": "mocha -R spec ./tests/"
+    "test": "mocha -R spec ./tests/acceptance"
   },
   "license": "MIT",
   "repository": {
