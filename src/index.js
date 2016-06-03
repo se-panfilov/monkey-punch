@@ -20,10 +20,11 @@ var Monkey = (function (config) {
   var isAfter = !!config.after;
 
   var _p = {
-    override: function (callback) {
+    override: function (cb) {
       var object = config.obj;
       var method = config.method;
-      object[method] = callback(object[method]);
+      object[method] = cb(object[method]);
+      console.log(1);
     },
     getLineNumber: function (key) {
       key = key.trim();
@@ -67,7 +68,7 @@ var Monkey = (function (config) {
 
       if (bodyConfig.positions)  fnArr = this.modifyAtPositions(fnArr, bodyConfig.positions);
       if (bodyConfig.regexps)  fnArr = this.modifyAtRegexp(fnArr, bodyConfig.regexps);
-      return this.makeFn(fnArr, config.linesDelimiter)
+      return fnArr;
     },
     injectLine: function (arr, position, val) {
       var line = this.getLineNumber(position);
@@ -154,16 +155,25 @@ var Monkey = (function (config) {
   var exports = {
     config: config,
     original: null,
+    linesDelimiter: config.linesDelimiter,
     before: config.before,
     after: config.after,
+    isModified: false,
     modifiedFnBody: null,
-    lazy: false,
+    isLazy: false,
     punch: function () {
+      //TODO (S.Panfilov) refactor work with override
+      
       _p.override(function (original) {
-        this.original = original;
+        exports.original = original;
         return function () {
+          this.isModified = true;
           if (isBefore) this.before.apply(this, arguments);
-          if (config.body) original = _p.modifyBody(config.body);
+          if (config.body) {
+            var fnArr = _p.modifyBody(config.body);
+            this.modifiedFnBody = fnArr.join(this.linesDelimiter);
+            original = _p.makeFn(fnArr, this.linesDelimiter)
+          }
           var returnValue = original.apply(this, arguments);
           if (isAfter) this.after.apply(this, arguments);
 
@@ -171,18 +181,21 @@ var Monkey = (function (config) {
         }
       });
 
-      return exports;
+      return this;
     },
     restore: function () {
       config.obj[config.method] = this.original;
+      this.isModified = false;
+      return this;
     },
     clear: function (isClearOrigin) {
       //TODO (S.Panfilov) clear monkey object, but stay patched
       //Perhaps should save optional possibility to restore after clear
+      return this;
     }
   };
 
-  if (!exports.lazy) return exports.punch();
+  if (!exports.isLazy) return exports.punch();
 
   return exports;
 });

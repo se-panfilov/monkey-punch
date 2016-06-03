@@ -69,6 +69,9 @@ describe('Body, modify at positions tests.', function () {
         console.log(monkey);
 
          var result = patchTarget.msg(2, 3);
+
+        console.log(monkey);
+
         // console.log(12312312312);
         // var expectedFnBody = insertVals(fnBodyDefault, 2, 3);
         // expectedFnBody = Utils.insertAtStr(expectedFnBody, 5, injectionValue);
