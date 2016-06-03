@@ -1,4 +1,9 @@
 module.exports = {
+  insertAtStr: function (str, lineNumber, value) {
+    var arr = str.split('\n');
+    arr.splice(lineNumber, 0, value);
+    return arr.join('\n')
+  },
   insertAt: function (arr, lineNumber, value) {
     arr.splice(lineNumber, 0, value);
   },

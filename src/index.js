@@ -21,6 +21,7 @@ var Monkey = (function (config) {
 
   var exports = {
     original: null,
+    //lazy: false
     _override: function (callback) {
       var object = config.obj;
       var method = config.method;
@@ -178,6 +179,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //TODO (S.Panfilov) Add support for one-liners
 //TODO (S.Panfilov) Add support for functions as well as strings in body params
 //TODO (S.Panfilov) add "punch": ability to patch func agaig after restore was called
+//TODO (S.Panfilov) Add "Lazy" option (do not patch immediately)
 
 // var myMonkey = new Monkey({
 //   obj: patchTarget,

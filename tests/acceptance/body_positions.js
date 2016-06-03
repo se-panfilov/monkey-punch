@@ -8,19 +8,23 @@ var patchTarget;
 
 var fnBodyDefault;
 
+function insertVals(a, b) {
+  return fnBodyDefault.replace('(VAL-A)', a).replace('(VAL-B)', b).replace('(VAL-S)', a + b);
+}
+
 beforeEach(function () {
-  fnBodyDefault = 'return \'-------Line: 0-------\n\' +' +
-      '\'Line: 1, a: \' + a + \'\n\' +' +
-      '\'Line: 2, b: \' + b + \'\n\' +' +
-      '\'Line: 3\' + \'\n\' +' +
-      '\'Line: 4\' + \'\n\' +' +
-      '\'Line: 5\' + \'\n\' +' +
-      '\'Line: 6\' + \'\n\' +' +
-      '\'Line: 7\' + \'\n\' +' +
-      '\'Line: 8\' + \'\n\' +' +
-      '\'Line: 9\' + \'\n\' +' +
-      '\'Line: 10: a + b: \' + (a + b) + \'\n\' +' +
-      '\'-------Line: 11-------\';';
+  fnBodyDefault = '-------Line: 0-------\n' +
+      'Line: 1, a: (VAL-A)' + '\n' +
+      'Line: 2, b: (VAL-B)' + '\n' +
+      'Line: 3' + '\n' +
+      'Line: 4' + '\n' +
+      'Line: 5' + '\n' +
+      'Line: 6' + '\n' +
+      'Line: 7' + '\n' +
+      'Line: 8' + '\n' +
+      'Line: 9' + '\n' +
+      'Line: 10: a + b: (VAL-S)' + '\n' +
+      '-------Line: 11-------';
 
   patchTarget = {
     msg: function (a, b) {
@@ -49,18 +53,22 @@ describe('Body, modify at positions tests.', function () {
 
       it('Inject at single line.', function () {
 
-        // new Monkey({
-        //   obj: patchTarget,
-        //   method: 'msg',
-        //   body: {
-        //     positions: {
-        //       5: '// injection to line five(5)'
-        //     }
-        //   }
-        // });
+        var injectionValue = 'injection to line five(5)';
+
+        new Monkey({
+          obj: patchTarget,
+          method: 'msg',
+          body: {
+            positions: {
+              5: '// injection to line five(5)'
+            }
+          }
+        });
 
         var result = patchTarget.msg(2, 3);
-        expect(result).to.be.equal(fnBodyDefault);
+        var expectedFnBody = insertVals(2, 3);
+        expectedFnBody = Utils.insertAtStr(expectedFnBody, 5, injectionValue);
+        expect(result).to.be.equal(expectedFnBody);
 
       });
 
