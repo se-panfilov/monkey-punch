@@ -1,24 +1,25 @@
 {
   "name": "monkey-punch",
-  "version": "0.0.9",
-  "description": "Library for properly Monkey-patching",
+  "version": "0.0.10",
+  "description": "Graceful Monkey-patching",
   "main": "./dist/monk-key-patching.js",
   "scripts": {
-    "test": "mocha -R spec ./tests/"
+    "test": "mocha -R spec ./tests/acceptance"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/se-panfilov/monk-key-patch.git"
+    "url": "git://github.com/se-panfilov/monkey-punch.git"
   },
   "bugs": {
-    "url": "https://github.com/se-panfilov/monk-key-patch/issues"
+    "url": "https://github.com/se-panfilov/monkey-punch/issues"
   },
   "keywords": [
-    "monk-key-patch",
-    "monk-key-patching",
+    "monkey-punch",
+    "monkey-patch",
     "monkey",
     "patching",
+    "patch",
     "override",
     "monkey-patching"
   ],

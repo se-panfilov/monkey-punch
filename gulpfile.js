@@ -7,6 +7,7 @@ requireDir('./build', { recurse: true });
 
 gulp.task('default', function () {
     gulp.start('make');
+    gulp.start('todo');
     gulp.start('watch');
 });
 

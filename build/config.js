@@ -2,7 +2,7 @@
 
 const SRC = 'src';
 const DEST = 'dist';
-const PROJECT_NAME = 'monk-key-patch';
+const PROJECT_NAME = 'monkey-punch';
 const TESTS_SRC = 'tests';
 
 const config = {

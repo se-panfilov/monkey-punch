@@ -1,4 +1,8 @@
-Lib for graceful Monkey-patching.
+Graceful Monkey-patching.
+------
+
+UNDER HEAVY CONSTRUCTION
+----
 
 [Monkey-patching][1] is a way to override or extend the behaviour of a method without changing its original source code.
 
@@ -38,7 +42,7 @@ Special thanks to [Thai Pangsakulyanont][4] and his [article][3].
 
 ## LICENSE
 
-MIT: https://github.com/se-panfilov/monk-key-patch/blob/master/LICENSE
+MIT: https://github.com/se-panfilov/monkey-punch/blob/master/LICENSE
 
 [1]: https://en.wikipedia.org/wiki/Monkey_patch
 [2]: http://javascript.info/tutorial/decorators
