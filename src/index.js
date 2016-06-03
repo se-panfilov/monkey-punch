@@ -177,6 +177,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //Roadmap:
 //TODO (S.Panfilov) Add support for one-liners
 //TODO (S.Panfilov) Add support for functions as well as strings in body params
+//TODO (S.Panfilov) add "punch": ability to patch func agaig after restore was called
 
 // var myMonkey = new Monkey({
 //   obj: patchTarget,

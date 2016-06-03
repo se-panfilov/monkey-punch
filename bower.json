@@ -1,5 +1,5 @@
 {
-  "name": "monk-key-patch",
+  "name": "monkey-punch",
   "version": "0.0.9",
   "description": "Library for properly Monkey-patching",
   "main": "./dist/monk-key-patching.js",

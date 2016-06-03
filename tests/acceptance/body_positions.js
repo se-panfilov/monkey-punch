@@ -6,33 +6,38 @@ var Utils = require('../utils');
 
 var patchTarget;
 
-var bodyStrArr;
+var fnBodyDefault;
 
 beforeEach(function () {
-  bodyStrArr = [
-    '-------Line: 0-------',
-    'Line: 1',
-    'Line: 2',
-    'Line: 3',
-    'Line: 4',
-    '-------Line: 5-------'
-  ];
+  fnBodyDefault = 'return \'-------Line: 0-------\n\' +' +
+      '\'Line: 1, a: \' + a + \'\n\' +' +
+      '\'Line: 2, b: \' + b + \'\n\' +' +
+      '\'Line: 3\' + \'\n\' +' +
+      '\'Line: 4\' + \'\n\' +' +
+      '\'Line: 5\' + \'\n\' +' +
+      '\'Line: 6\' + \'\n\' +' +
+      '\'Line: 7\' + \'\n\' +' +
+      '\'Line: 8\' + \'\n\' +' +
+      '\'Line: 9\' + \'\n\' +' +
+      '\'Line: 10: a + b: \' + (a + b) + \'\n\' +' +
+      '\'-------Line: 11-------\';';
 
   patchTarget = {
-    property: [],
-    sum: function (a, b) {
-      this.property.push('-------Line: 0-------');
-      this.property.push('Line: 1');
-      this.property.push('Line: 2');
-      this.property.push('Line: 3');
-      this.property.push('Line: 4');
-      this.property.push('-------Line: 5-------');
-      return a + b;
+    msg: function (a, b) {
+      return '-------Line: 0-------\n' +
+          'Line: 1, a: ' + a + '\n' +
+          'Line: 2, b: ' + b + '\n' +
+          'Line: 3' + '\n' +
+          'Line: 4' + '\n' +
+          'Line: 5' + '\n' +
+          'Line: 6' + '\n' +
+          'Line: 7' + '\n' +
+          'Line: 8' + '\n' +
+          'Line: 9' + '\n' +
+          'Line: 10: a + b: ' + (a + b) + '\n' +
+          '-------Line: 11-------';
     },
-    closureVal: 1,
-    closureSum: function (a) {
-      return a + this.closureVal;
-    }
+    oneLiner: function (a, b) {return 'OneLinerSum: ' + a + b;}// this function should be a single line
   };
 });
 
@@ -44,15 +49,18 @@ describe('Body, modify at positions tests.', function () {
 
       it('Inject at single line.', function () {
 
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              5: '// injection to line five'
-            }
-          }
-        });
+        // new Monkey({
+        //   obj: patchTarget,
+        //   method: 'msg',
+        //   body: {
+        //     positions: {
+        //       5: '// injection to line five(5)'
+        //     }
+        //   }
+        // });
+
+        var result = patchTarget.msg(2, 3);
+        expect(result).to.be.equal(fnBodyDefault);
 
       });
 
