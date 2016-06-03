@@ -8,8 +8,9 @@ var patchTarget;
 
 var fnBodyDefault;
 
-function insertVals(a, b) {
-  return fnBodyDefault.replace('(VAL-A)', a).replace('(VAL-B)', b).replace('(VAL-S)', a + b);
+function insertVals(str, a, b) {
+  console.log(str);
+  return str.replace('(VAL-A)', a).replace('(VAL-B)', b).replace('(VAL-S)', a + b);
 }
 
 beforeEach(function () {
@@ -60,471 +61,472 @@ describe('Body, modify at positions tests.', function () {
           method: 'msg',
           body: {
             positions: {
-              5: '// injection to line five(5)'
+              5: injectionValue
             }
           }
         });
 
-        var result = patchTarget.msg(2, 3);
-        var expectedFnBody = insertVals(2, 3);
-        expectedFnBody = Utils.insertAtStr(expectedFnBody, 5, injectionValue);
-        expect(result).to.be.equal(expectedFnBody);
+         var result = patchTarget.msg(2, 3);
+        // console.log(12312312312);
+        // var expectedFnBody = insertVals(fnBodyDefault, 2, 3);
+        // expectedFnBody = Utils.insertAtStr(expectedFnBody, 5, injectionValue);
+        // expect(result).to.be.equal(expectedFnBody);
 
       });
 
-      it('Inject at multiple lines.', function () {
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              1: '// injection to line one(1)',
-              5: '// injection to line five(5)',
-              2: '// injection to line two(2)'
-            }
-          }
-        });
-
-      });
-
-      it('Inject line to too big line number.', function () {
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              999: '// injection to line 999'
-            }
-          }
-        });
-
-      });
+      // it('Inject at multiple lines.', function () {
+      //
+      //   new Monkey({
+      //     obj: patchTarget,
+      //     method: 'sum',
+      //     body: {
+      //       positions: {
+      //         1: '// injection to line one(1)',
+      //         5: '// injection to line five(5)',
+      //         2: '// injection to line two(2)'
+      //       }
+      //     }
+      //   });
+      //
+      // });
+      //
+      // it('Inject line to too big line number.', function () {
+      //
+      //   new Monkey({
+      //     obj: patchTarget,
+      //     method: 'sum',
+      //     body: {
+      //       positions: {
+      //         999: '// injection to line 999'
+      //       }
+      //     }
+      //   });
+      //
+      // });
 
     });
 
-    describe('Check Inject Functions.', function () {
-
-      it('Inject at single line.', function () {
-
-        function injectAtLineFive(cb) {
-          var result = '// injection to line five(5)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              5: injectAtLineFive
-            }
-          }
-        });
-
-      });
-
-      it('Inject at multiple lines.', function () {
-
-        function injectAtLineOne(cb) {
-          //TODO (S.Panfilov)
-          var result = '// injection to line one(1)';
-          cb();
-          return result;
-        }
-
-        function injectAtLineTwo(cb) {
-          //TODO (S.Panfilov)
-          var result = '// injection to line two(2)';
-          cb();
-          return result;
-        }
-
-        function injectAtLineFive(cb) {
-          var result = '// injection to line five(5)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              1: injectAtLineOne,
-              5: injectAtLineTwo,
-              2: injectAtLineFive
-            }
-          }
-        });
-
-      });
-
-      it('Inject line to too big line number.', function () {
-
-        function injectAtLine999(cb) {
-          var result = '// injection to line 999';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              999: injectAtLine999
-            }
-          }
-        });
-
-      });
-
-    });
-
-  });
-
-  describe('Check Inject at lines and columns.', function () {
-
-    describe('Check Inject Strings.', function () {
-
-      it('Inject at single line and column.', function () {
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              '5,3': '// injection to line five(5) and column three(3)'
-            }
-          }
-        });
-
-      });
-
-      it('Inject at multiple lines and columns.', function () {
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              5: '// injection to line five(5)',
-              '5,5': '// injection to line five(5), column five(5)',
-              '6,0': '// injection to line six(6), column zero(0)',
-              4: '// injection to line four(4)',
-              '6,1': '// injection to line six(6), column one(1)',
-              '6,2': '// injection to line six(6), column two(2)',
-              6: '// injection to line six(6)'
-            }
-          }
-        });
-
-      });
-
-      it('Inject line to too big line and column number.', function () {
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              '999, 1999': '// injection to line (999,1999)'
-            }
-          }
-        });
-
-      });
-
-    });
-
-    describe('Check Inject Functions.', function () {
-
-      it('Inject at single line and column.', function () {
-
-        function injectAtLineFiveColumnThree(cb) {
-          var result = '// injection to line five(5), column three(3)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              '5,3': injectAtLineFiveColumnThree
-            }
-          }
-        });
-
-      });
-
-      it('Inject at multiple lines and columns.', function () {
-
-
-        function injectAtLineFour(cb) {
-          var result = '// injection to line four(4)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        function injectAtLineFive(cb) {
-          var result = '// injection to line five(5)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        function injectAtLineSix(cb) {
-          var result = '// injection to line six(6)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        function injectAtLineFiveColumnFive(cb) {
-          var result = '// injection to line five(5), column five(5)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        function injectAtLineSixColumnZero(cb) {
-          var result = '// injection to line six(6), column zero(0)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        function injectAtLineSixColumnOne(cb) {
-          var result = '// injection to line six(6), column one(1)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        function injectAtLineSixColumnTwo(cb) {
-          var result = '// injection to line six(6), column two(2)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              5: injectAtLineFive,
-              '5,5': injectAtLineFiveColumnFive,
-              '6,0': injectAtLineSixColumnZero,
-              4: injectAtLineFour,
-              '6,1': injectAtLineSixColumnOne,
-              '6,2': injectAtLineSixColumnTwo,
-              6: injectAtLineSix
-            }
-          }
-        });
-
-      });
-
-      it('Inject line to too big line and column number.', function () {
-
-        function injectAtLine999Column1999(cb) {
-          var result = '// injection to line (999,1999)';
-          //TODO (S.Panfilov)
-          cb();
-          return result;
-        }
-
-        new Monkey({
-          obj: patchTarget,
-          method: 'sum',
-          body: {
-            positions: {
-              '999, 1999': injectAtLine999Column1999
-            }
-          }
-        });
-
-      });
-
-    });
-
-  });
-
-  describe('Body all-in-one check.', function () {
-
-    it('Inject at single line and column.', function () {
-
-      function injectAtLineFour(cb) {
-        var result = '// injection to line four(4)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLineFive(cb) {
-        var result = '// injection to line five(5)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLineSix(cb) {
-        var result = '// injection to line six(6)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLineFiveColumnFive(cb) {
-        var result = '// injection to line five(5), column five(5)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLineSixColumnZero(cb) {
-        var result = '// injection to line six(6), column zero(0)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLineSixColumnOne(cb) {
-        var result = '// injection to line six(6), column one(1)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLineSixColumnTwo(cb) {
-        var result = '// injection to line six(6), column two(2)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLine1024(cb) {
-        var result = '// injection to line (1024)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLine666Column999(cb) {
-        var result = '// injection to (666, 999)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLine666Column0(cb) {
-        var result = '// injection to (666, 0)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      new Monkey({
-        obj: patchTarget,
-        method: 'sum',
-        body: {
-          positions: {
-            '1,2': '// injection to line one(1) column two(2)',
-            1: '// injection to line one(1)',
-            '1,3': '// injection to line one(1) column three(3)',
-            5: injectAtLineFive,
-            '5,5': injectAtLineFiveColumnFive,
-            '7,2': '// injection to line seven(7) column two(2)',
-            '7,3': '// injection to line seven(7) column three(3)',
-            '6,0': injectAtLineSixColumnZero,
-            4: injectAtLineFour,
-            '6,1': injectAtLineSixColumnOne,
-            '6,2': injectAtLineSixColumnTwo,
-            6: injectAtLineSix,
-            1024: injectAtLine1024,
-            '666,999': injectAtLine666Column999,
-            '666,0': injectAtLine666Column0,
-            1023: '// injection to line 1023',
-            '777,888': '// injection to line (777,888)',
-            '777,1': '// injection to line (777,1)'
-          }
-        }
-      });
-
-    });
-
-  });
-
-  describe('Wrong keys checks.', function () {
-
-    it('Inject at multiple lines and columns.', function () {
-
-      function injectAtLineA(cb) {
-        var result = '// injection to line A(A)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectionWithSpaceLine5Column5(cb) {
-        var result = '// injection to line five(5), column five(5)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtColumnOne(cb) {
-        var result = '// injection to BAD line, column one(1)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLineSixColumnTwo(cb) {
-        var result = '// injection to line six(6), column two(2)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      function injectAtLineSeven(cb) {
-        var result = '// injection to line seven(7)';
-        //TODO (S.Panfilov)
-        cb();
-        return result;
-      }
-
-      new Monkey({
-        obj: patchTarget,
-        method: 'sum',
-        body: {
-          positions: {
-            'a': injectAtLineA,
-            'b': '// injection to line B(B)',
-            '5, 5': injectionWithSpaceLine5Column5,
-            '6, 0': '// injection to line siz(6), column zero(0)',
-            ',1': injectAtColumnOne,
-            ',2': '// injection to BAD line, column two(2)',
-            '6.2': injectAtLineSixColumnTwo,
-            '6.3': '// injection to line six(6), column three(3)',
-            '7,': injectAtLineSeven,
-            '8,': '// injection to line eight(6)'
-          }
-        }
-      });
-
-    });
+  //   describe('Check Inject Functions.', function () {
+  //
+  //     it('Inject at single line.', function () {
+  //
+  //       function injectAtLineFive(cb) {
+  //         var result = '// injection to line five(5)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       new Monkey({
+  //         obj: patchTarget,
+  //         method: 'sum',
+  //         body: {
+  //           positions: {
+  //             5: injectAtLineFive
+  //           }
+  //         }
+  //       });
+  //
+  //     });
+  //
+  //     it('Inject at multiple lines.', function () {
+  //
+  //       function injectAtLineOne(cb) {
+  //         //TODO (S.Panfilov)
+  //         var result = '// injection to line one(1)';
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       function injectAtLineTwo(cb) {
+  //         //TODO (S.Panfilov)
+  //         var result = '// injection to line two(2)';
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       function injectAtLineFive(cb) {
+  //         var result = '// injection to line five(5)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       new Monkey({
+  //         obj: patchTarget,
+  //         method: 'sum',
+  //         body: {
+  //           positions: {
+  //             1: injectAtLineOne,
+  //             5: injectAtLineTwo,
+  //             2: injectAtLineFive
+  //           }
+  //         }
+  //       });
+  //
+  //     });
+  //
+  //     it('Inject line to too big line number.', function () {
+  //
+  //       function injectAtLine999(cb) {
+  //         var result = '// injection to line 999';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       new Monkey({
+  //         obj: patchTarget,
+  //         method: 'sum',
+  //         body: {
+  //           positions: {
+  //             999: injectAtLine999
+  //           }
+  //         }
+  //       });
+  //
+  //     });
+  //
+  //   });
+  //
+  // });
+  //
+  // describe('Check Inject at lines and columns.', function () {
+  //
+  //   describe('Check Inject Strings.', function () {
+  //
+  //     it('Inject at single line and column.', function () {
+  //
+  //       new Monkey({
+  //         obj: patchTarget,
+  //         method: 'sum',
+  //         body: {
+  //           positions: {
+  //             '5,3': '// injection to line five(5) and column three(3)'
+  //           }
+  //         }
+  //       });
+  //
+  //     });
+  //
+  //     it('Inject at multiple lines and columns.', function () {
+  //
+  //       new Monkey({
+  //         obj: patchTarget,
+  //         method: 'sum',
+  //         body: {
+  //           positions: {
+  //             5: '// injection to line five(5)',
+  //             '5,5': '// injection to line five(5), column five(5)',
+  //             '6,0': '// injection to line six(6), column zero(0)',
+  //             4: '// injection to line four(4)',
+  //             '6,1': '// injection to line six(6), column one(1)',
+  //             '6,2': '// injection to line six(6), column two(2)',
+  //             6: '// injection to line six(6)'
+  //           }
+  //         }
+  //       });
+  //
+  //     });
+  //
+  //     it('Inject line to too big line and column number.', function () {
+  //
+  //       new Monkey({
+  //         obj: patchTarget,
+  //         method: 'sum',
+  //         body: {
+  //           positions: {
+  //             '999, 1999': '// injection to line (999,1999)'
+  //           }
+  //         }
+  //       });
+  //
+  //     });
+  //
+  //   });
+  //
+  //   describe('Check Inject Functions.', function () {
+  //
+  //     it('Inject at single line and column.', function () {
+  //
+  //       function injectAtLineFiveColumnThree(cb) {
+  //         var result = '// injection to line five(5), column three(3)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       new Monkey({
+  //         obj: patchTarget,
+  //         method: 'sum',
+  //         body: {
+  //           positions: {
+  //             '5,3': injectAtLineFiveColumnThree
+  //           }
+  //         }
+  //       });
+  //
+  //     });
+  //
+  //     it('Inject at multiple lines and columns.', function () {
+  //
+  //
+  //       function injectAtLineFour(cb) {
+  //         var result = '// injection to line four(4)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       function injectAtLineFive(cb) {
+  //         var result = '// injection to line five(5)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       function injectAtLineSix(cb) {
+  //         var result = '// injection to line six(6)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       function injectAtLineFiveColumnFive(cb) {
+  //         var result = '// injection to line five(5), column five(5)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       function injectAtLineSixColumnZero(cb) {
+  //         var result = '// injection to line six(6), column zero(0)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       function injectAtLineSixColumnOne(cb) {
+  //         var result = '// injection to line six(6), column one(1)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       function injectAtLineSixColumnTwo(cb) {
+  //         var result = '// injection to line six(6), column two(2)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       new Monkey({
+  //         obj: patchTarget,
+  //         method: 'sum',
+  //         body: {
+  //           positions: {
+  //             5: injectAtLineFive,
+  //             '5,5': injectAtLineFiveColumnFive,
+  //             '6,0': injectAtLineSixColumnZero,
+  //             4: injectAtLineFour,
+  //             '6,1': injectAtLineSixColumnOne,
+  //             '6,2': injectAtLineSixColumnTwo,
+  //             6: injectAtLineSix
+  //           }
+  //         }
+  //       });
+  //
+  //     });
+  //
+  //     it('Inject line to too big line and column number.', function () {
+  //
+  //       function injectAtLine999Column1999(cb) {
+  //         var result = '// injection to line (999,1999)';
+  //         //TODO (S.Panfilov)
+  //         cb();
+  //         return result;
+  //       }
+  //
+  //       new Monkey({
+  //         obj: patchTarget,
+  //         method: 'sum',
+  //         body: {
+  //           positions: {
+  //             '999, 1999': injectAtLine999Column1999
+  //           }
+  //         }
+  //       });
+  //
+  //     });
+  //
+  //   });
+  //
+  // });
+  //
+  // describe('Body all-in-one check.', function () {
+  //
+  //   it('Inject at single line and column.', function () {
+  //
+  //     function injectAtLineFour(cb) {
+  //       var result = '// injection to line four(4)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLineFive(cb) {
+  //       var result = '// injection to line five(5)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLineSix(cb) {
+  //       var result = '// injection to line six(6)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLineFiveColumnFive(cb) {
+  //       var result = '// injection to line five(5), column five(5)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLineSixColumnZero(cb) {
+  //       var result = '// injection to line six(6), column zero(0)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLineSixColumnOne(cb) {
+  //       var result = '// injection to line six(6), column one(1)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLineSixColumnTwo(cb) {
+  //       var result = '// injection to line six(6), column two(2)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLine1024(cb) {
+  //       var result = '// injection to line (1024)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLine666Column999(cb) {
+  //       var result = '// injection to (666, 999)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLine666Column0(cb) {
+  //       var result = '// injection to (666, 0)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     new Monkey({
+  //       obj: patchTarget,
+  //       method: 'sum',
+  //       body: {
+  //         positions: {
+  //           '1,2': '// injection to line one(1) column two(2)',
+  //           1: '// injection to line one(1)',
+  //           '1,3': '// injection to line one(1) column three(3)',
+  //           5: injectAtLineFive,
+  //           '5,5': injectAtLineFiveColumnFive,
+  //           '7,2': '// injection to line seven(7) column two(2)',
+  //           '7,3': '// injection to line seven(7) column three(3)',
+  //           '6,0': injectAtLineSixColumnZero,
+  //           4: injectAtLineFour,
+  //           '6,1': injectAtLineSixColumnOne,
+  //           '6,2': injectAtLineSixColumnTwo,
+  //           6: injectAtLineSix,
+  //           1024: injectAtLine1024,
+  //           '666,999': injectAtLine666Column999,
+  //           '666,0': injectAtLine666Column0,
+  //           1023: '// injection to line 1023',
+  //           '777,888': '// injection to line (777,888)',
+  //           '777,1': '// injection to line (777,1)'
+  //         }
+  //       }
+  //     });
+  //
+  //   });
+  //
+  // });
+  //
+  // describe('Wrong keys checks.', function () {
+  //
+  //   it('Inject at multiple lines and columns.', function () {
+  //
+  //     function injectAtLineA(cb) {
+  //       var result = '// injection to line A(A)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectionWithSpaceLine5Column5(cb) {
+  //       var result = '// injection to line five(5), column five(5)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtColumnOne(cb) {
+  //       var result = '// injection to BAD line, column one(1)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLineSixColumnTwo(cb) {
+  //       var result = '// injection to line six(6), column two(2)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     function injectAtLineSeven(cb) {
+  //       var result = '// injection to line seven(7)';
+  //       //TODO (S.Panfilov)
+  //       cb();
+  //       return result;
+  //     }
+  //
+  //     new Monkey({
+  //       obj: patchTarget,
+  //       method: 'sum',
+  //       body: {
+  //         positions: {
+  //           'a': injectAtLineA,
+  //           'b': '// injection to line B(B)',
+  //           '5, 5': injectionWithSpaceLine5Column5,
+  //           '6, 0': '// injection to line siz(6), column zero(0)',
+  //           ',1': injectAtColumnOne,
+  //           ',2': '// injection to BAD line, column two(2)',
+  //           '6.2': injectAtLineSixColumnTwo,
+  //           '6.3': '// injection to line six(6), column three(3)',
+  //           '7,': injectAtLineSeven,
+  //           '8,': '// injection to line eight(6)'
+  //         }
+  //       }
+  //     });
+  //
+  //   });
 
   });
 

@@ -89,8 +89,8 @@ var Monkey = (function (config) {
       var positionsKeys = this._sortNumberArr(Object.keys(positions));
 
       for (var i = positionsKeys.length - 1; i >= 0; i--) {
-        var positionKey = i;
-        var positionVal = positions[i];
+        var positionKey = positionsKeys[i];
+        var positionVal = positions[positionsKeys];
         //TODO (S.Panfilov) cur work point
         this._injectLine(fnArr, positionKey, positionVal);
       }
@@ -139,7 +139,8 @@ var Monkey = (function (config) {
       if (fn.name) return fn.name;
 
       var regexp = /^function\s+([\w\$]+)\s*\(/;
-      return regexp.exec(fn.toString())[1];
+      var nameArr = regexp.exec(fn.toString());
+      return (nameArr) ? nameArr[1] : null;
     },
     _getParamNames: function (fn) {
       var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
@@ -157,12 +158,12 @@ var Monkey = (function (config) {
 
   (function main() {
     exports._override(function (original) {
-      exports.original = original;
+      //exports.original = original;
       return function () {
-        if (isBefore) config.before.apply(this, arguments);
+        //if (isBefore) config.before.apply(this, arguments);
         if (config.body) original = exports._modifyBody(config.body);
         var returnValue = original.apply(this, arguments);
-        if (isAfter) config.after.apply(this, arguments);
+        //if (isAfter) config.after.apply(this, arguments);
 
         return returnValue;
       }
