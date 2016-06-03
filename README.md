@@ -11,7 +11,7 @@ UNDER HEAVY CONSTRUCTION
 ```javascript
 var myMonkey = new Monkey({
   obj: patchTarget,
-  method: 'sum',
+  method: ['sum', 'min'],
   linesDelimiter: '\n',
   before: doItBefore,
   after: doItAfter,

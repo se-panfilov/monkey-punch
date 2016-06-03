@@ -208,10 +208,11 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //TODO (S.Panfilov) Add support for functions as well as strings in body params
 //TODO (S.Panfilov) add "punch": ability to patch func agaig after restore was called
 //TODO (S.Panfilov) Add "Lazy" option (do not patch immediately)
+//TODO (S.Panfilov) Add ability to patch several methods at once
 
 // var myMonkey = new Monkey({
 //   obj: patchTarget,
-//   method: 'sum',
+//   method: ['sum', 'min'], //patch one (string) or several methods (array of str)
 //   linesDelimiter: '\n',
 //   before: doItBefore,
 //   after: doItAfter,
