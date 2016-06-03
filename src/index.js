@@ -19,34 +19,32 @@ var Monkey = (function (config) {
   var isBefore = !!config.before;
   var isAfter = !!config.after;
 
-  var exports = {
-    original: null,
-    //lazy: false
-    _override: function (callback) {
+  var _p = {
+    override: function (callback) {
       var object = config.obj;
       var method = config.method;
       object[method] = callback(object[method]);
     },
-    _getLineNumber: function (key) {
+    getLineNumber: function (key) {
       key = key.trim();
       var commaIndex = key.indexOf(',');
       if (commaIndex === -1) return key;
       return +key.substr(0, key.indexOf(','));
     },
-    _getColumnNumber: function (key) {
+    getColumnNumber: function (key) {
       key = key.trim();
       var commaIndex = key.indexOf(',');
       if (commaIndex === -1) return 0;
       return +key.substr(key.indexOf(',') + 1);
     },
-    _sortNumberArr: function (arr) {
+    sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
-        return this._getLineNumber(a) > this._getLineNumber(b)
+        return this.getLineNumber(a) > this.getLineNumber(b)
       };
 
       return arr.sort(numberSort);
     },
-    _getStrArr: function (fn, linesDelimiter) {
+    getStrArr: function (fn, linesDelimiter) {
       var fnArr = fn.toString().split(linesDelimiter);
       //TODO (S.Panfilov) check this for one-liner
       // Remove first line: "function (a) {"
@@ -55,25 +53,25 @@ var Monkey = (function (config) {
       fnArr.splice(fnArr.length - 1, 1);
       return fnArr;
     },
-    _makeFn: function (fnArr, linesDelimiter) {
-      var fnName = this._getFnName(config.method);
+    makeFn: function (fnArr, linesDelimiter) {
+      var fnName = this.getFnName(config.method);
       var fnStr = fnArr.join(linesDelimiter);
-      var fnArgs = this._getParamNames(config.method);
+      var fnArgs = this.getParamNames(config.method);
 
       //this is for named function
       if (fnName) fnStr = 'return function ' + fnName + ' () {' + fnStr + '};';
       return new Function(fnArgs, fnStr);
     },
-    _modifyBody: function (bodyConfig) {
-      var fnArr = this._getStrArr(config.obj[config.method], config.linesDelimiter);
+    modifyBody: function (bodyConfig) {
+      var fnArr = this.getStrArr(config.obj[config.method], config.linesDelimiter);
 
-      if (bodyConfig.positions)  fnArr = this._modifyAtPositions(fnArr, bodyConfig.positions);
-      if (bodyConfig.regexps)  fnArr = this._modifyAtRegexp(fnArr, bodyConfig.regexps);
-      return this._makeFn(fnArr, config.linesDelimiter)
+      if (bodyConfig.positions)  fnArr = this.modifyAtPositions(fnArr, bodyConfig.positions);
+      if (bodyConfig.regexps)  fnArr = this.modifyAtRegexp(fnArr, bodyConfig.regexps);
+      return this.makeFn(fnArr, config.linesDelimiter)
     },
-    _injectLine: function (arr, position, val) {
-      var line = this._getLineNumber(position);
-      var column = this._getColumnNumber(position);
+    injectLine: function (arr, position, val) {
+      var line = this.getLineNumber(position);
+      var column = this.getColumnNumber(position);
 
       if (column > arr[line].length) column = arr.length;
 
@@ -85,26 +83,26 @@ var Monkey = (function (config) {
 
       return arr;
     },
-    _modifyAtPositions: function (fnArr, positions) {
-      var positionsKeys = this._sortNumberArr(Object.keys(positions));
+    modifyAtPositions: function (fnArr, positions) {
+      var positionsKeys = this.sortNumberArr(Object.keys(positions));
 
       for (var i = positionsKeys.length - 1; i >= 0; i--) {
         var positionKey = positionsKeys[i];
         var positionVal = positions[positionsKeys];
         //TODO (S.Panfilov) cur work point
-        this._injectLine(fnArr, positionKey, positionVal);
+        this.injectLine(fnArr, positionKey, positionVal);
       }
 
       return fnArr;
     },
-    _wrapRegex: function (str) {
+    wrapRegex: function (str) {
 
       //TODO (S.Panfilov) this woudn't work cause of '/g', '/i', etc. Should make new RegExp perhaps
       var isWrapped = (str.indexOf('/') === 0 && str.lastIndexOf('/'));
 
       return (isWrapped) ? str : ('/' + str + '/');
     },
-    _modifyAtRegexp: function (fnArr, regexpObj, linesDelimiter) {
+    modifyAtRegexp: function (fnArr, regexpObj, linesDelimiter) {
       var fnStr = fnArr.join(linesDelimiter);
 
       for (var regex in regexpObj) {
@@ -122,27 +120,27 @@ var Monkey = (function (config) {
               var _match = matchesArr[i];
               var positions = [{}];
               positions[0][_match] = fnOrStr;
-              fnStr = (this._modifyAtPositions(this._getStrArr(fnStr), positions)).join(linesDelimiter);
+              fnStr = (this.modifyAtPositions(this.getStrArr(fnStr), positions)).join(linesDelimiter);
             }
 
           } else { //string
-            fnStr.replace(this._wrapRegex(regex), fnOrStr);
+            fnStr.replace(this.wrapRegex(regex), fnOrStr);
           }
         }
       }
 
 
-      return this._getStrArr(fnArr, config.linesDelimiter);
+      return this.getStrArr(fnArr, config.linesDelimiter);
 
     },
-    _getFnName: function (fn) {
+    getFnName: function (fn) {
       if (fn.name) return fn.name;
 
       var regexp = /^function\s+([\w\$]+)\s*\(/;
       var nameArr = regexp.exec(fn.toString());
       return (nameArr) ? nameArr[1] : null;
     },
-    _getParamNames: function (fn) {
+    getParamNames: function (fn) {
       var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
       var ARGUMENT_NAMES = /([^\s,]+)/g;
 
@@ -150,25 +148,41 @@ var Monkey = (function (config) {
       var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
 
       return result || [];
-    },
-    restore: function () {
-      config.obj[config.method] = this.original;
     }
   };
 
-  (function main() {
-    exports._override(function (original) {
-      //exports.original = original;
-      return function () {
-        //if (isBefore) config.before.apply(this, arguments);
-        if (config.body) original = exports._modifyBody(config.body);
-        var returnValue = original.apply(this, arguments);
-        //if (isAfter) config.after.apply(this, arguments);
+  var exports = {
+    config: config,
+    original: null,
+    before: config.before,
+    after: config.after,
+    modifiedFnBody: null,
+    lazy: false,
+    punch: function () {
+      _p.override(function (original) {
+        this.original = original;
+        return function () {
+          if (isBefore) this.before.apply(this, arguments);
+          if (config.body) original = _p.modifyBody(config.body);
+          var returnValue = original.apply(this, arguments);
+          if (isAfter) this.after.apply(this, arguments);
 
-        return returnValue;
-      }
-    });
-  })();
+          return returnValue;
+        }
+      });
+
+      return exports;
+    },
+    restore: function () {
+      config.obj[config.method] = this.original;
+    },
+    clear: function (isClearOrigin) {
+      //TODO (S.Panfilov) clear monkey object, but stay patched
+      //Perhaps should save optional possibility to restore after clear
+    }
+  };
+
+  if (!exports.lazy) return exports.punch();
 
   return exports;
 });

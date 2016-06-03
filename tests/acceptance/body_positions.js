@@ -56,7 +56,7 @@ describe('Body, modify at positions tests.', function () {
 
         var injectionValue = 'injection to line five(5)';
 
-        new Monkey({
+        var monkey = new Monkey({
           obj: patchTarget,
           method: 'msg',
           body: {
@@ -65,6 +65,8 @@ describe('Body, modify at positions tests.', function () {
             }
           }
         });
+
+        console.log(monkey);
 
          var result = patchTarget.msg(2, 3);
         // console.log(12312312312);
