@@ -54,18 +54,17 @@ var Monkey = (function (config) {
       fnArr.splice(fnArr.length - 1, 1);
       return fnArr;
     },
-    makeFn: function (fnArr, linesDelimiter) {
-      var fnName = this.getFnName(config.method);
+    makeFn: function (fnArr, originalFn, linesDelimiter) {
+      var fnName = this.getFnName(originalFn);
       var fnStr = fnArr.join(linesDelimiter);
-      var fnArgs = this.getParamNames(config.method);
+      var fnArgs = this.getParamNames(originalFn);
 
       //this is for named function
       if (fnName) fnStr = 'return function ' + fnName + ' () {' + fnStr + '};';
+      //TODO (S.Panfilov) CurWorkPoint fnStr is invalid
       return new Function(fnArgs, fnStr);
     },
-    modifyBody: function (bodyConfig) {
-      var fnArr = this.getStrArr(config.obj[config.method], config.linesDelimiter);
-
+    modifyBody: function (fnArr, bodyConfig) {
       if (bodyConfig.positions)  fnArr = this.modifyAtPositions(fnArr, bodyConfig.positions);
       if (bodyConfig.regexps)  fnArr = this.modifyAtRegexp(fnArr, bodyConfig.regexps);
       return fnArr;
@@ -154,32 +153,57 @@ var Monkey = (function (config) {
 
   var exports = {
     config: config,
-    original: null,
+    originalFn: null,
+    modifiedFn: null,
     linesDelimiter: config.linesDelimiter,
     before: config.before,
     after: config.after,
-    isModified: false,
-    modifiedFnBody: null,
     isLazy: false,
     punch: function () {
       //TODO (S.Panfilov) refactor work with override
-      
-      _p.override(function (original) {
-        exports.original = original;
-        return function () {
-          this.isModified = true;
-          if (isBefore) this.before.apply(this, arguments);
-          if (config.body) {
-            var fnArr = _p.modifyBody(config.body);
-            this.modifiedFnBody = fnArr.join(this.linesDelimiter);
-            original = _p.makeFn(fnArr, this.linesDelimiter)
-          }
-          var returnValue = original.apply(this, arguments);
-          if (isAfter) this.after.apply(this, arguments);
+
+      this.originalFn = this.config.obj[this.config.method];
+
+      if (this.config.body) {
+        this.modifiedFn = this.config.obj[this.config.method];
+        var fnArr = _p.getStrArr(this.modifiedFn, this.linesDelimiter);
+        _p.modifyBody(fnArr, config.body);
+        this.modifiedFn = _p.makeFn(fnArr, this.originalFn, this.linesDelimiter);
+      }
+
+      var fn = (this.modifiedFn) ? this.modifiedFn : this.originalFn;
+
+      if (!this.before && !this.after) {
+        this.config.obj[this.config.method] = this.fn;
+      } else {
+        var self = this;
+        this.config.obj[this.config.method] = function () {
+
+          if (isBefore) self.before(arguments);
+
+          var returnValue = self.fn(arguments);
+
+          if (isAfter) self.after(arguments);
 
           return returnValue;
         }
-      });
+      }
+
+      // _p.override(function (original) {
+      //   exports.original = original;
+      //   return function () {
+      //     if (isBefore) this.before.apply(this, arguments);
+      //     if (config.body) {
+      //       var fnArr = _p.modifyBody(config.body);
+      //       this.modifiedFnBody = fnArr.join(this.linesDelimiter);
+      //       original = _p.makeFn(fnArr, this.linesDelimiter)
+      //     }
+      //     var returnValue = original.apply(this, arguments);
+      //     if (isAfter) this.after.apply(this, arguments);
+      //
+      //     return returnValue;
+      //   }
+      // });
 
       return this;
     },
