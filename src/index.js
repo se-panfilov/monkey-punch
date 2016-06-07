@@ -173,6 +173,8 @@ var Monkey = (function (config) {
 
       var fn = (this.modifiedFn) ? this.modifiedFn : this.originalFn;
 
+      //TODO (S.Panfilov) cur work point
+
       if (!this.before && !this.after) {
         this.config.obj[this.config.method] = this.fn;
       } else {

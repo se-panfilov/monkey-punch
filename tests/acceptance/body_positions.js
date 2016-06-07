@@ -54,7 +54,7 @@ describe('Body, modify at positions tests.', function () {
 
       it('Inject at single line.', function () {
 
-        var injectionValue = 'injection to line five(5)';
+        var injectionValue = '\'injection to line five(5)\' + ';
 
         var monkey = new Monkey({
           obj: patchTarget,
