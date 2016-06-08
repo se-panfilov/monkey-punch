@@ -102,6 +102,7 @@ describe('Body, modify at positions tests.', function () {
         var modifiedFnArr = Utils.getFnArr(patchTarget, '\n');
 
         var expectedLine = originFnArr[6] + injectionValue;
+        //TODO (S.Panfilov) this is a shit, why modified fn have an additional row?
         expect(expectedLine).to.be.equal(modifiedFnArr[6 + 1]);
 
       });

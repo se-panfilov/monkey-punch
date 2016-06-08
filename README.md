@@ -12,10 +12,11 @@ UNDER HEAVY CONSTRUCTION
 var myMonkey = new Monkey({
   obj: patchTarget,
   method: ['sum', 'min'],
-  linesDelimiter: '\n',
-  before: doItBefore,
-  after: doItAfter,
+  before: doItBefore, //only function here
+  after: doItAfter, //should be called with same args as origin
   body: {
+    linesDelimiter: '\n',
+    isEval: false, //option to use eval instead of new Function
     regexps: {
       '/\)\n/g': addSemiQuoteFn, // add ';' after each ')'
       '/\{/g': ' ' // add space before each'{'

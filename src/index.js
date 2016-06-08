@@ -222,15 +222,16 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //TODO (S.Panfilov) Add ability to patch several methods at once/
 //TODO (S.Panfilov) Add ability to use eval instead of new Func
 //TODO (S.Panfilov) make sure column can be setted up from the end (-1)
+//TODO (S.Panfilov) Before and After should be called with same args as origin
 
 // var myMonkey = new Monkey({
 //   obj: patchTarget,
 //   method: ['sum', 'min'], //patch one (string) or several methods (array of str)
-//   before: doItBefore,
-//   after: doItAfter,
+//   before: doItBefore, //only function here
+//   after: doItAfter, // should be called with same args as origin
 //   body: {
-//   linesDelimiter: '\n',
-//     isEval: false, //option to ue eval instead of new Function
+//     linesDelimiter: '\n',
+//     isEval: false, //option to use eval instead of new Function
 //     regexps: {
 //       '/\)\n/g': addSemiQuoteFn, // add ';' after each ')'
 //       '/\{/g': ' ' // add space before each'{'
