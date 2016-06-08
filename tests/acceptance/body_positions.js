@@ -48,7 +48,7 @@ beforeEach(function () {
       var c = 'Line 2';
       //Line 3
       var d = 'Line 4';
-      var e //Line 5
+      var e = 'Line 5';
       var f = 'This is: ';//Line 6
       //Line 7
       var g = 'Line 8';
@@ -73,18 +73,15 @@ describe('Body, modify at positions tests.', function () {
     describe('Check Inject Strings.', function () {
 
       it('Inject at single line.', function () {
-
-        var injectionValue = 'injection to line five(5)';
-
-        var originFn = patchTarget.newMsg;
-        var originFnStr = originFn.toString();
-        var originFnArr = originFnStr.split('\n');
+        var injectionValue = 'b += 1; //injection to line five(5)';
+        var originFnArr =  Utils.getFnArr(patchTarget, '\n');
 
         expect(patchTarget.executionCounter).to.be.equal(0);
         var originResult = patchTarget.newMsg(2, 3);
+        expect(patchTarget.executionCounter).to.be.equal(1);
         expect(originResult).to.be.equal(5);
 
-        var monkey = new Monkey({
+        new Monkey({
           obj: patchTarget,
           method: 'newMsg',
           body: {
@@ -97,14 +94,13 @@ describe('Body, modify at positions tests.', function () {
         expect(patchTarget.executionCounter).to.be.equal(1);
 
         var modifiedResult = patchTarget.newMsg(2, 3);
+        var expectedResult = originResult + 1;
 
         expect(patchTarget.executionCounter).to.be.equal(2);
-        expect(modifiedResult).to.be.equal(originResult);
+        expect(modifiedResult).to.be.equal(expectedResult);
 
-        var modifiedFn = patchTarget.newMsg;
-        var modifiedFnStr = modifiedFn.toString();
-        var modifiedFnArr = modifiedFnStr.split('\n');
-        
+        var modifiedFnArr = Utils.getFnArr(patchTarget, '\n');
+
         var expectedLine = originFnArr[6] + injectionValue;
         expect(expectedLine).to.be.equal(modifiedFnArr[6 + 1]);
 
