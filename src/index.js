@@ -54,15 +54,23 @@ var Monkey = (function (config) {
       fnArr.splice(fnArr.length - 1, 1);
       return fnArr;
     },
-    makeFn: function (fnArr, originalFn, linesDelimiter) {
+    makeFn: function (fnArr, originalFn, linesDelimiter, isEval) {
       var fnName = this.getFnName(originalFn);
       var fnStr = fnArr.join(linesDelimiter);
       var fnArgs = this.getParamNames(originalFn);
+      var result;
 
-      //this is for named function
-      if (fnName) fnStr = 'return function ' + fnName + ' () {' + fnStr + '};';
-      //TODO (S.Panfilov) CurWorkPoint fnStr is invalid
-      return new Function(fnArgs, fnStr);
+      if (!isEval) {
+        //this is for named function
+        if (fnName) fnStr = 'return function ' + fnName + ' () {' + fnStr + '};';
+
+        result = new Function(fnArgs, fnStr);
+      } else {
+        //TODO (S.Panfilov) debug this branch
+        //TODO (S.Panfilov) what about comma at the end?
+        result = eval('function ' + fnName + '(' + fnArgs.toString + ') {' + fnStr + '}');
+      }
+      return result;
     },
     modifyBody: function (fnArr, bodyConfig) {
       if (bodyConfig.positions)  fnArr = this.modifyAtPositions(fnArr, bodyConfig.positions);
@@ -171,19 +179,15 @@ var Monkey = (function (config) {
         this.modifiedFn = _p.makeFn(fnArr, this.originalFn, this.linesDelimiter);
       }
 
-      var fn = (this.modifiedFn) ? this.modifiedFn : this.originalFn;
-
-      //TODO (S.Panfilov) cur work point
-
       if (!this.before && !this.after) {
-        this.config.obj[this.config.method] = this.fn;
+        this.config.obj[this.config.method] = this.modifiedFn || this.originalFn;
       } else {
         var self = this;
         this.config.obj[this.config.method] = function () {
 
           if (isBefore) self.before(arguments);
 
-          var returnValue = self.fn(arguments);
+          var returnValue = (self.modifiedFn) ? self.modifiedFn(arguments) : self.originalFn(arguments);
 
           if (isAfter) self.after(arguments);
 
@@ -234,7 +238,8 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //TODO (S.Panfilov) Add support for functions as well as strings in body params
 //TODO (S.Panfilov) add "punch": ability to patch func agaig after restore was called
 //TODO (S.Panfilov) Add "Lazy" option (do not patch immediately)
-//TODO (S.Panfilov) Add ability to patch several methods at once
+//TODO (S.Panfilov) Add ability to patch several methods at once/
+//TODO (S.Panfilov) Add ability to use eval instead of new Func
 
 // var myMonkey = new Monkey({
 //   obj: patchTarget,
@@ -243,6 +248,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //   before: doItBefore,
 //   after: doItAfter,
 //   body: {
+//     isEval: false, //option to ue eval instead of new Function
 //     regexps: {
 //       '/\)\n/g': addSemiQuoteFn, // add ';' after each ')'
 //       '/\{/g': ' ' // add space before each'{'
