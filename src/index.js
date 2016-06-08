@@ -3,7 +3,7 @@ var Monkey = (function (config) {
 
   if (!config) console.error('Error: no config');
 
-  config.linesDelimiter = config.linesDelimiter || '\n';
+  config.body.linesDelimiter = config.body.linesDelimiter || '\n';
 
   //TODO (S.Panfilov) return errors for out of range
   // if (config._maxLineKey > linesCount) {
@@ -136,7 +136,7 @@ var Monkey = (function (config) {
         }
       }
 
-      return this.getStrArr(fnArr, config.linesDelimiter);
+      return this.getStrArr(fnArr, config.body.linesDelimiter);
     },
     getFnName: function (fn) {
       if (fn.name) return fn.name;
@@ -160,7 +160,7 @@ var Monkey = (function (config) {
     config: config,
     originalFn: null,
     modifiedFn: null,
-    linesDelimiter: config.linesDelimiter,
+    linesDelimiter: config.body.linesDelimiter,
     before: config.before,
     after: config.after,
     isLazy: false,
@@ -191,22 +191,6 @@ var Monkey = (function (config) {
           return returnValue;
         }
       }
-
-      // _p.override(function (original) {
-      //   exports.original = original;
-      //   return function () {
-      //     if (isBefore) this.before.apply(this, arguments);
-      //     if (config.body) {
-      //       var fnArr = _p.modifyBody(config.body);
-      //       this.modifiedFnBody = fnArr.join(this.linesDelimiter);
-      //       original = _p.makeFn(fnArr, this.linesDelimiter)
-      //     }
-      //     var returnValue = original.apply(this, arguments);
-      //     if (isAfter) this.after.apply(this, arguments);
-      //
-      //     return returnValue;
-      //   }
-      // });
 
       return this;
     },
@@ -242,10 +226,10 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 // var myMonkey = new Monkey({
 //   obj: patchTarget,
 //   method: ['sum', 'min'], //patch one (string) or several methods (array of str)
-//   linesDelimiter: '\n',
 //   before: doItBefore,
 //   after: doItAfter,
 //   body: {
+//   linesDelimiter: '\n',
 //     isEval: false, //option to ue eval instead of new Function
 //     regexps: {
 //       '/\)\n/g': addSemiQuoteFn, // add ';' after each ')'
