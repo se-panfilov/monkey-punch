@@ -2,7 +2,7 @@
   "name": "monkey-punch",
   "version": "0.0.10",
   "description": "Graceful Monkey-patching",
-  "main": "./dist/monk-key-patching.js",
+  "main": "./lib/index.js",
   "scripts": {
     "test": "mocha -R spec ./tests/acceptance"
   },
