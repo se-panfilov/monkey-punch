@@ -24,7 +24,6 @@ var Monkey = (function (config) {
       var object = config.obj;
       var method = config.method;
       object[method] = cb(object[method]);
-      console.log(1);
     },
     getLineNumber: function (key) {
       key = key.trim();
@@ -35,7 +34,7 @@ var Monkey = (function (config) {
     getColumnNumber: function (key) {
       key = key.trim();
       var commaIndex = key.indexOf(',');
-      if (commaIndex === -1) return 0;
+      if (commaIndex === -1) return null;
       return +key.substr(key.indexOf(',') + 1);
     },
     sortNumberArr: function (arr) {
@@ -77,17 +76,18 @@ var Monkey = (function (config) {
       if (bodyConfig.regexps)  fnArr = this.modifyAtRegexp(fnArr, bodyConfig.regexps);
       return fnArr;
     },
-    injectLine: function (arr, position, val) {
+    injectAtLine: function (arr, position, val) {
       var line = this.getLineNumber(position);
       var column = this.getColumnNumber(position);
+      var isNoColumn = !column && column !== 0;
 
-      if (column > arr[line].length) column = arr.length;
+      if (column > arr[line].length || isNoColumn) column = arr[line].length;
 
-      if (column > 0) {
-        arr.splice(line, 0, val);
-      } else {
-        arr[line] = arr[line].slice(0, column) + val + arr[line].slice(column);
-      }
+      // if (column > 0) {
+      // arr.splice(line, 0, val);
+      // } else {
+      arr[line] = arr[line].slice(0, column) + val + arr[line].slice(column);
+      // }
 
       return arr;
     },
@@ -97,8 +97,7 @@ var Monkey = (function (config) {
       for (var i = positionsKeys.length - 1; i >= 0; i--) {
         var positionKey = positionsKeys[i];
         var positionVal = positions[positionsKeys];
-        //TODO (S.Panfilov) cur work point
-        this.injectLine(fnArr, positionKey, positionVal);
+        this.injectAtLine(fnArr, positionKey, positionVal);
       }
 
       return fnArr;
@@ -137,9 +136,7 @@ var Monkey = (function (config) {
         }
       }
 
-
       return this.getStrArr(fnArr, config.linesDelimiter);
-
     },
     getFnName: function (fn) {
       if (fn.name) return fn.name;
@@ -240,6 +237,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //TODO (S.Panfilov) Add "Lazy" option (do not patch immediately)
 //TODO (S.Panfilov) Add ability to patch several methods at once/
 //TODO (S.Panfilov) Add ability to use eval instead of new Func
+//TODO (S.Panfilov) make sure column can be setted up from the end (-1)
 
 // var myMonkey = new Monkey({
 //   obj: patchTarget,
@@ -259,6 +257,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //       2: lineTwoInjectionFunc,
 //       '6,10': '// Injection to line 6 column 10',
 //       '2,3': lineTwoColumnThreeInjectionFunc
+//       '2,-1': lineTwoColumnOneFromEndInjectionFunc
 //     }
 //   }
 // });
