@@ -20,11 +20,6 @@ var Monkey = (function (config) {
   var isAfter = !!config.after;
 
   var _p = {
-    override: function (cb) {
-      var object = config.obj;
-      var method = config.method;
-      object[method] = cb(object[method]);
-    },
     getLineNumber: function (key) {
       key = key.trim();
       var commaIndex = key.indexOf(',');
@@ -67,7 +62,7 @@ var Monkey = (function (config) {
       } else {
         //TODO (S.Panfilov) debug this branch
         //TODO (S.Panfilov) what about comma at the end?
-        result = eval('function ' + fnName + '(' + fnArgs.toString + ') {' + fnStr + '}');
+        result = eval('(function ' + fnName + '(' + fnArgs.toString + ') {' + fnStr + '})');
       }
       return result;
     },
@@ -165,8 +160,6 @@ var Monkey = (function (config) {
     after: config.after,
     isLazy: false,
     punch: function () {
-      //TODO (S.Panfilov) refactor work with override
-
       this.originalFn = this.config.obj[this.config.method];
 
       if (this.config.body) {
@@ -223,6 +216,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //TODO (S.Panfilov) Add ability to use eval instead of new Func
 //TODO (S.Panfilov) make sure column can be setted up from the end (-1)
 //TODO (S.Panfilov) Before and After should be called with same args as origin
+//TODO (S.Panfilov) check closures and globals in terms of new Func
 
 // var myMonkey = new Monkey({
 //   obj: patchTarget,
@@ -241,7 +235,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //       5: '// injection to line five',
 //       2: lineTwoInjectionFunc,
 //       '6,10': '// Injection to line 6 column 10',
-//       '2,3': lineTwoColumnThreeInjectionFunc
+//       '2,3': lineTwoColumnThreeInjectionFunc,
 //       '2,-1': lineTwoColumnOneFromEndInjectionFunc
 //     }
 //   }

@@ -6,43 +6,10 @@ var Utils = require('../utils');
 
 var patchTarget;
 
-var fnBodyDefault;
-
-function insertVals(str, a, b) {
-  return str.replace('(VAL-A)', a).replace('(VAL-B)', b).replace('(VAL-S)', a + b);
-}
-
 beforeEach(function () {
-  fnBodyDefault = '-------Line: 0-------\n' +
-      'Line: 1, a: (VAL-A)' + '\n' +
-      'Line: 2, b: (VAL-B)' + '\n' +
-      'Line: 3' + '\n' +
-      'Line: 4' + '\n' +
-      'Line: 5' + '\n' +
-      'Line: 6' + '\n' +
-      'Line: 7' + '\n' +
-      'Line: 8' + '\n' +
-      'Line: 9' + '\n' +
-      'Line: 10: a + b: (VAL-S)' + '\n' +
-      '-------Line: 11-------';
-
   patchTarget = {
     executionCounter: 0,
-    msg: function (a, b) {
-      return '-------Line: 0-------' +
-          'Line: 1, a: ' + a +
-          'Line: 2, b: ' + b +
-          'Line: 3' +
-          'Line: 4' +
-          'Line: 5' +
-          'Line: 6' +
-          'Line: 7' +
-          'Line: 8' +
-          'Line: 9' +
-          'Line: 10: a + b: ' + (a + b) +
-          '-------Line: 11-------';
-    },
-    newMsg: function (a, b) {
+    sum: function (a, b) {
       'use strict';//Line 0
 
       var c = 'Line 2';
@@ -77,13 +44,13 @@ describe('Body, modify at positions tests.', function () {
         var originFnArr =  Utils.getFnArr(patchTarget, '\n');
 
         expect(patchTarget.executionCounter).to.be.equal(0);
-        var originResult = patchTarget.newMsg(2, 3);
+        var originResult = patchTarget.sum(2, 3);
         expect(patchTarget.executionCounter).to.be.equal(1);
         expect(originResult).to.be.equal(5);
 
         new Monkey({
           obj: patchTarget,
-          method: 'newMsg',
+          method: 'sum',
           body: {
             positions: {
               5: injectionValue
@@ -93,7 +60,7 @@ describe('Body, modify at positions tests.', function () {
 
         expect(patchTarget.executionCounter).to.be.equal(1);
 
-        var modifiedResult = patchTarget.newMsg(2, 3);
+        var modifiedResult = patchTarget.sum(2, 3);
         var expectedResult = originResult + 1;
 
         expect(patchTarget.executionCounter).to.be.equal(2);

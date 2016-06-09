@@ -26,7 +26,8 @@ var myMonkey = new Monkey({
       5: '// injection to line five',
       2: lineTwoInjectionFunc,
       '6,10': '// Injection to line 6 column 10',
-      '2,3': lineTwoColumnThreeInjectionFunc
+      '2,3': lineTwoColumnThreeInjectionFunc,
+      '2,-1': '// Injection to line 2 column -1 (1 from lines end)'
     }
   }
 });
