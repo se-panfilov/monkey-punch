@@ -1,6 +1,6 @@
 module.exports = {
   getFnArr (fn, delimiter){
-    return fn.newMsg.toString().split(delimiter);
+    return fn.toString().split(delimiter);
   },
   insertAtStr (str, lineNumber, value) {
     var arr = str.split('\n');

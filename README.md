@@ -14,6 +14,7 @@ var myMonkey = new Monkey({
   method: ['sum', 'min'],
   before: doItBefore, //only function here
   after: doItAfter, //should be called with same args as origin
+  isLazy: false, // lazy allow you to not patch immediately
   body: {
     linesDelimiter: '\n',
     isEval: false, //option to use eval instead of new Function

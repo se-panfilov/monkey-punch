@@ -41,7 +41,7 @@ describe('Body, modify at positions tests.', function () {
 
       it('Inject at single line.', function () {
         var injectionValue = 'b += 1; //injection to line five(5)';
-        var originFnArr =  Utils.getFnArr(patchTarget, '\n');
+        var originFnArr =  Utils.getFnArr(patchTarget.sum, '\n');
 
         expect(patchTarget.executionCounter).to.be.equal(0);
         var originResult = patchTarget.sum(2, 3);
@@ -66,7 +66,7 @@ describe('Body, modify at positions tests.', function () {
         expect(patchTarget.executionCounter).to.be.equal(2);
         expect(modifiedResult).to.be.equal(expectedResult);
 
-        var modifiedFnArr = Utils.getFnArr(patchTarget, '\n');
+        var modifiedFnArr = Utils.getFnArr(patchTarget.sum, '\n');
 
         var expectedLine = originFnArr[6] + injectionValue;
         //TODO (S.Panfilov) this is a shit, why modified fn have an additional row?

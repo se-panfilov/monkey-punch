@@ -210,11 +210,11 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //Roadmap:
 //TODO (S.Panfilov) Add support for one-liners
 //TODO (S.Panfilov) Add support for functions as well as strings in body params
-//TODO (S.Panfilov) add "punch": ability to patch func agaig after restore was called
+//TODO (S.Panfilov) add "punch": ability to patch func again after restore was called
 //TODO (S.Panfilov) Add "Lazy" option (do not patch immediately)
 //TODO (S.Panfilov) Add ability to patch several methods at once/
 //TODO (S.Panfilov) Add ability to use eval instead of new Func
-//TODO (S.Panfilov) make sure column can be setted up from the end (-1)
+//TODO (S.Panfilov) make sure column can be set up from the end (-1)
 //TODO (S.Panfilov) Before and After should be called with same args as origin
 //TODO (S.Panfilov) check closures and globals in terms of new Func
 
@@ -223,6 +223,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //   method: ['sum', 'min'], //patch one (string) or several methods (array of str)
 //   before: doItBefore, //only function here
 //   after: doItAfter, // should be called with same args as origin
+//   isLazy: false, // lazy allow you to not patch immediately
 //   body: {
 //     linesDelimiter: '\n',
 //     isEval: false, //option to use eval instead of new Function
