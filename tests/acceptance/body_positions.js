@@ -70,6 +70,7 @@ describe('Body, modify at positions tests.', function () {
 
         var expectedLine = originFnArr[6] + injectionValue;
         //TODO (S.Panfilov) this is a shit, why modified fn have an additional row?
+        //TODO (S.Panfilov) handle '\n/' + '**/' issue
         expect(expectedLine).to.be.equal(modifiedFnArr[6 + 1]);
 
       });

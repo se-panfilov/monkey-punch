@@ -39,6 +39,9 @@ myMonkey.restore();
 // ...
 ```
 
+
+//TODO (S.Panfilov)  add few words about '\n/**/' issue
+
 ## References
 
 Special thanks to [Thai Pangsakulyanont][4] and his [article][3].
