@@ -12,20 +12,20 @@ beforeEach(function () {
     sum: function (a, b) {
       'use strict';//Line 0
 
-      var c = 'Line 2';
+      var line2 = 'Line 2';
       //Line 3
-      var d = 'Line 4';
-      var e = 'Line 5';
-      var f = 'This is: ';//Line 6
+      var line4 = 'Line 4';
+      var line5 = 'Line 5';
+      var line6 = 'This is: ';//Line 6
       //Line 7
-      var g = 'Line 8';
+      var line8 = 'Line 8';
       //Line 9
-      let h = /.*/g;
-      const j = `Line 11 ${a + b}`;
+      let line10 = /.*/g;
+      const line11 = `Line 11 ${a + b}`;
       /*Line 12*/
       this.executionCounter += 1; //Line 13
 
-      return a + b; //line 14
+      return a + b; //line 15
     },
     oneLiner: function (a, b) {
       return 'OneLinerSum: ' + a + b;

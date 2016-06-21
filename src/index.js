@@ -34,7 +34,7 @@ var Monkey = (function (config) {
     },
     sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
-        return this.getLineNumber(a) > this.getLineNumber(b)
+        return this.getLineNumber(a) > this.getLineNumber(b);
       };
 
       return arr.sort(numberSort);
@@ -114,7 +114,7 @@ var Monkey = (function (config) {
             //(asd.toString()).search(/\)\n/g)
             var match;
             var matchesArr = [];
-            while ((match = regex.exec(fnStr)) != null) {
+            while ((match = regex.exec(fnStr)) !== null) {
               matchesArr.push(match.index);
             }
 
@@ -182,7 +182,7 @@ var Monkey = (function (config) {
           if (isAfter) self.after(arguments);
 
           return returnValue;
-        }
+        };
       }
 
       return this;
