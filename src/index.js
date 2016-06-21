@@ -86,8 +86,18 @@ var Monkey = (function (config) {
 
       return arr;
     },
+    isIllegalKey: function (arr, fnArr) {
+      for (var i = 0; i < arr.length; i++) {
+        var positionKey = arr[i];
+        if (positionKey <= 0 || positionKey >= fnArr.length)  return true;//TODO (S.Panfilov) Cur work point
+      }
+
+      return false;
+    },
     modifyAtPositions: function (fnArr, positions) {
       var positionsKeys = this.sortNumberArr(Object.keys(positions));
+
+      if (this.isIllegalKey(positionsKeys, fnArr)) return console.error('Illegal key present');
 
       for (var i = positionsKeys.length - 1; i >= 0; i--) {
         var positionKey = positionsKeys[i];
