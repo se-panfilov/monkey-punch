@@ -34,7 +34,7 @@ var Monkey = (function (config) {
     },
     sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
-        return this.getLineNumber(a) > this.getLineNumber(b);
+        return _p.getLineNumber(a) > _p.getLineNumber(b);
       };
 
       return arr.sort(numberSort);
@@ -91,7 +91,7 @@ var Monkey = (function (config) {
 
       for (var i = positionsKeys.length - 1; i >= 0; i--) {
         var positionKey = positionsKeys[i];
-        var positionVal = positions[positionsKeys];
+        var positionVal = positions[positionKey];
         this.injectAtLine(fnArr, positionKey, positionVal);
       }
 
@@ -207,16 +207,16 @@ var Monkey = (function (config) {
 //Support of node.js
 if (typeof module === 'object' && module.exports) module.exports = Monkey;
 
-//Roadmap:
-//TODO (S.Panfilov) Add support for one-liners
-//TODO (S.Panfilov) Add support for functions as well as strings in body params
-//TODO (S.Panfilov) add "punch": ability to patch func again after restore was called
-//TODO (S.Panfilov) Add "Lazy" option (do not patch immediately)
-//TODO (S.Panfilov) Add ability to patch several methods at once/
-//TODO (S.Panfilov) Add ability to use eval instead of new Func
-//TODO (S.Panfilov) make sure column can be set up from the end (-1)
-//TODO (S.Panfilov) Before and After should be called with same args as origin
-//TODO (S.Panfilov) check closures and globals in terms of new Func
+//TODO (S.Panfilov) Roadmap:
+// - Add support for one-liners
+// - Add support for functions as well as strings in body params
+// - add "punch": ability to patch func again after restore was called
+// - Add "Lazy" option (do not patch immediately)
+// - Add ability to patch several methods at once/
+// - Add ability to use eval instead of new Func
+// - make sure column can be set up from the end (-1)
+// - Before and After should be called with same args as origin
+// - Check closures and globals in terms of new Func
 
 // var myMonkey = new Monkey({
 //   obj: patchTarget,
