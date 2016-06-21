@@ -1,4 +1,6 @@
-Graceful Monkey-patching.
+[![Build Status](https://travis-ci.org/se-panfilov/monkey-punch.svg?branch=master)](https://travis-ci.org/se-panfilov/monkey-punch)
+
+Graceful Monkey-patching
 ------
 
 UNDER HEAVY CONSTRUCTION
