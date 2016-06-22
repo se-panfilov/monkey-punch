@@ -76,6 +76,9 @@ var Monkey = (function (config) {
       var column = this.getColumnNumber(position);
       var isNoColumn = !column && column !== 0;
 
+      //TODO (S.Panfilov) this should be in docs (we are trimming the lines)
+      arr[line] = arr[line].trim();
+
       if (column > arr[line].length || isNoColumn) column = arr[line].length;
 
       // if (column > 0) {
@@ -224,10 +227,9 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 
 //TODO (S.Panfilov) Roadmap:
 // - Add support for one-liners
-// - Add support for functions as well as strings in body params
 // - Add "punch": ability to patch func again after restore was called
 // - Add "Lazy" option (do not patch immediately)
-// - Add ability to patch several methods at once/
+// - Add ability to patch several methods at once (in arr of str)
 // - Add ability to use eval instead of new Func
 // - make sure column can be set up from the end (-1)
 // - Before and After should be called with same args as origin
