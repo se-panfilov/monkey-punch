@@ -81,6 +81,11 @@ var Monkey = (function (config) {
       // if (column > 0) {
       // arr.splice(line, 0, val);
       // } else {
+      //TODO (S.Panfilov) here we inject the result of 'val()', but perhaps will be better to pass function here somehow
+      //TODO (S.Panfilov) the idea is to run val() when only modified function will be called
+      //TODO (S.Panfilov) and to have an ability to pass context here
+      //TODO (S.Panfilov) in this case would be a reason to call val's cb
+      if (typeof val === 'function') val = val();
       arr[line] = arr[line].slice(0, column) + val + arr[line].slice(column);
       // }
 
@@ -220,7 +225,7 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //TODO (S.Panfilov) Roadmap:
 // - Add support for one-liners
 // - Add support for functions as well as strings in body params
-// - add "punch": ability to patch func again after restore was called
+// - Add "punch": ability to patch func again after restore was called
 // - Add "Lazy" option (do not patch immediately)
 // - Add ability to patch several methods at once/
 // - Add ability to use eval instead of new Func
