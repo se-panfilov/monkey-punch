@@ -472,25 +472,7 @@ describe('Body, modify at positions tests.', function () {
 
         var expectedLine = originFnArr[16].trim().slice(0, 7) + injectionValue + originFnArr[16].trim().slice(7);
         expect(expectedLine).to.be.equal(modifiedFnArr[16 + 1]);
-
-        function qw() {
-          'use strict';//Line 0
-
-          var line2 = 'Line 2';
-          //Line 3
-          var line4 = 'Line 4';/*inject at line: 4. Counter: 9 */
-          var line5 = 'Line 5';/*inject at line: 5. Counter: 8 */
-          /*inject at line: 6. Counter: 6 */var//*inject at line: 6, and column: 4. Counter: 5 */*inject at line: 6, and column: 3. Counter: 4 */ line6 = 'This is: ';//Line 6/*inject at line: 6. Counter: 7 */
-//L/*inject at line: 7, and column: 3. Counter: 2 */ine /*inject at line: 7, and column: -1. Counter: 3 */7
-          var line8 = 'Line 8';
-          //Line 9
-          let line10 = /.*/g;
-          const line11 = `Line 11 ${a + b}`;
-          /*Line 12*/
-          this.executionCounter += 1; //Line 13
-
-          return /*inject at line: 15, and column: 7. Counter: 1 */a + b/*inject at line: 15, and column: 12. Counter: 0 */; //line 15
-        }
+        
 
       });
       //
