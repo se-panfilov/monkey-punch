@@ -9,6 +9,24 @@ var patchTarget;
 beforeEach(function () {
   patchTarget = {
     executionCounter: 0,
+    // sum: function (a, b) {
+    //   'use strict';//Line 0
+    //
+    //   var line2 = 'Line 2';
+    //   //Line 3
+    //   var line4 = 'Line 4';
+    //   var line5 = 'Line 5';
+    //   var line6 = 'This is: ';//Line 6
+    //   //Line 7
+    //   var line8 = 'Line 8';
+    //   //Line 9
+    //   let line10 = /.*/g;
+    //   const line11 = `Line 11 ${a + b}`;
+    //   /*Line 12*/
+    //   this.executionCounter += 1; //Line 13
+    //
+    //   return a + b; //line 15
+    // },
     sum: function (a, b) {
       'use strict';//Line 0
 
@@ -22,10 +40,13 @@ beforeEach(function () {
       //Line 9
       let line10 = /.*/g;
       const line11 = `Line 11 ${a + b}`;
-      /*Line 12*/
+      //////////////////////////////////
       this.executionCounter += 1; //Line 13
 
       return a + b; //line 15
+    },
+    line: function () {
+      return ""
     },
     oneLiner: function (a, b) {
       return 'OneLinerSum: ' + a + b;
@@ -277,38 +298,38 @@ describe('Body, modify at positions tests.', function () {
 
       describe('Check Inject Strings.', function () {
 
-        it('Inject at single line and column.', function () {
-          var injectionValue = ' b + ';//injection to line 15 column 7
-          var originFnArr = Utils.getFnArr(patchTarget.sum, '\n');
-
-          expect(patchTarget.executionCounter).to.be.equal(0);
-          var originResult = patchTarget.sum(2, 3); //5
-          expect(patchTarget.executionCounter).to.be.equal(1);
-          expect(originResult).to.be.equal(5);
-
-          new Monkey({
-            obj: patchTarget,
-            method: 'sum',
-            body: {
-              positions: {
-                '15,7': injectionValue
-              }
-            }
-          });
-
-          expect(patchTarget.executionCounter).to.be.equal(1);
-
-          var modifiedResult = patchTarget.sum(2, 3);
-          var expectedResult = originResult + 3;
-
-          expect(patchTarget.executionCounter).to.be.equal(2);
-          expect(modifiedResult).to.be.equal(expectedResult);
-
-          var modifiedFnArr = Utils.getFnArr(patchTarget.sum, '\n');
-
-          var expectedLine = originFnArr[16].trim().slice(0, 7) + injectionValue + originFnArr[16].trim().slice(7);
-          expect(expectedLine).to.be.equal(modifiedFnArr[16 + 1]);
-        });
+        // it('Inject at single line and column.', function () {
+        //   var injectionValue = ' b + ';//injection to line 15 column 7
+        //   var originFnArr = Utils.getFnArr(patchTarget.sum, '\n');
+        //
+        //   expect(patchTarget.executionCounter).to.be.equal(0);
+        //   var originResult = patchTarget.sum(2, 3); //5
+        //   expect(patchTarget.executionCounter).to.be.equal(1);
+        //   expect(originResult).to.be.equal(5);
+        //
+        //   new Monkey({
+        //     obj: patchTarget,
+        //     method: 'sum',
+        //     body: {
+        //       positions: {
+        //         '15,7': injectionValue
+        //       }
+        //     }
+        //   });
+        //
+        //   expect(patchTarget.executionCounter).to.be.equal(1);
+        //
+        //   var modifiedResult = patchTarget.sum(2, 3);
+        //   var expectedResult = originResult + 3;
+        //
+        //   expect(patchTarget.executionCounter).to.be.equal(2);
+        //   expect(modifiedResult).to.be.equal(expectedResult);
+        //
+        //   var modifiedFnArr = Utils.getFnArr(patchTarget.sum, '\n');
+        //
+        //   var expectedLine = originFnArr[16].trim().slice(0, 7) + injectionValue + originFnArr[16].trim().slice(7);
+        //   expect(expectedLine).to.be.equal(modifiedFnArr[16 + 1]);
+        // });
       });
 
       // it('Inject at multiple lines and columns.', function () {
@@ -358,46 +379,61 @@ describe('Body, modify at positions tests.', function () {
 
         let counter = 0;
 
-        function injectAtLine(line, column) {
-          const isColumn = !!column && column !== 0;
-          let result  = `/*inject at line: ${line}`;
-          if (isColumn) result += `, and column: ${column}`;
-          result += `. Counter: ${counter} */`;
-          counter += 1;
-          return result;
-        }
+        // function injectAtLine(line, column) {
+        //   const isColumn = !!column && column !== 0;
+        //   let result = `/*inject at line: ${line}`;
+        //   if (isColumn) result += `, and column: ${column}`;
+        //   result += `. Counter: ${counter} */`;
+        //   counter += 1;
+        //   return result;
+        // }
 
-        var injectionValue = ' b + ';//injection to line 15 column 7
-        var originFnArr = Utils.getFnArr(patchTarget.sum, '\n');
+        // var injectionValue = ' b + ';//injection to line 15 column 7
+        // var originFnArr = Utils.getFnArr(patchTarget.line, '\n');
+        //
+        // expect(patchTarget.executionCounter).to.be.equal(0);
+        // var originResult = patchTarget.sum(2, 3); //5
+        // expect(patchTarget.executionCounter).to.be.equal(1);
+        // expect(originResult).to.be.equal(5);
 
-        expect(patchTarget.executionCounter).to.be.equal(0);
-        var originResult = patchTarget.sum(2, 3); //5
-        expect(patchTarget.executionCounter).to.be.equal(1);
-        expect(originResult).to.be.equal(5);
+        //TODO (S.Panfilov) uncomment
+        // new Monkey({
+        //   obj: patchTarget,
+        //   method: 'sum',
+        //   body: {
+        //     positions: {
+        //       5: injectAtLine.bind(this, 5),
+        //       '15,7': injectAtLine.bind(this, 15, 7),
+        //       '15,12': injectAtLine.bind(this, 15, 12),
+        //       '6,0': function () {
+        //         return injectAtLine(6, 0);
+        //       },
+        //       4: function () {
+        //         return injectAtLine(4);
+        //       },
+        //       '6,4': injectAtLine.bind(this, 6, 4),
+        //       '7,-1': injectAtLine.bind(this, 7, -1),
+        //       '7,3': () => {
+        //         return injectAtLine(7, 3);
+        //       },
+        //       '6,3': () => {
+        //         return injectAtLine(6, 3);
+        //       },
+        //       6: injectAtLine.bind(this, 6)
+        //     }
+        //   }
+        // });
 
         new Monkey({
           obj: patchTarget,
-          method: 'sum',
+          method: 'line',
           body: {
             positions: {
-              5: injectAtLine.bind(this, 5),
-              '15,7': injectAtLine.bind(this, 15, 7),
-              '15,12': injectAtLine.bind(this, 15, 12),
-              '6,0': function () {
-                return injectAtLine(6, 0);
-              },
-              4: function () {
-                return injectAtLine(4);
-              },
-              '6,4': injectAtLine.bind(this, 6, 4),
-              '7,-1': injectAtLine.bind(this, 7, -1),
-              '7,3': () => {
-                return injectAtLine(7, 3);
-              },
-              '6,3': () => {
-                return injectAtLine(6, 3);
-              },
-              6: injectAtLine.bind(this, 6)
+              '0,8': '1', //'(12,4)',
+              '0,7': '2', //'(12,3)',
+              '0,-1': '4', //'(12,-1)',
+              '0,-2': '5', //'(12,-2)',
+              '0': '6' //'(12)'
             }
           }
         });
@@ -456,23 +492,23 @@ describe('Body, modify at positions tests.', function () {
 //         }
 
         //TODO (S.Panfilov) make sure that column injection order is desc:
-        //TODO (S.Panfilov) '6,2', '6,1', '6,0', '6'
+        //TODO (S.Panfilov) '6,2', '6,1', '6,0', '6,-1', '6',
         //TODO (S.Panfilov) '7,3', '7,-1'
 
-        expect(patchTarget.executionCounter).to.be.equal(1);
+        //expect(patchTarget.executionCounter).to.be.equal(1);
 
         //TODO (S.Panfilov) we should check the results but not right now
-        var modifiedResult = patchTarget.sum(2, 3);
+        var modifiedResult = patchTarget.line();
         //var expectedResult = originResult + 3;
 
-        expect(patchTarget.executionCounter).to.be.equal(2);
+        //expect(patchTarget.executionCounter).to.be.equal(2);
         // expect(modifiedResult).to.be.equal(expectedResult);
 
-        var modifiedFnArr = Utils.getFnArr(patchTarget.sum, '\n');
+        var modifiedFnArr = Utils.getFnArr(patchTarget.line, '\n');
 
         var expectedLine = originFnArr[16].trim().slice(0, 7) + injectionValue + originFnArr[16].trim().slice(7);
         expect(expectedLine).to.be.equal(modifiedFnArr[16 + 1]);
-        
+
 
       });
       //

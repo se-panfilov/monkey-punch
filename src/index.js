@@ -32,9 +32,29 @@ var Monkey = (function (config) {
       if (commaIndex === -1) return null;
       return +key.substr(key.indexOf(',') + 1);
     },
+    getPositionWeight: function (position) {
+      //TODO (S.Panfilov) check issue with array's elements order in JS
+      //var expectedArr = ['0,8', '0,7', '0,-1', '0,-2', '0'];
+      var _this = this;
+
+      // var lines = position.map(function (e) {
+      //   return _this.getLineNumber(e);
+      // });
+      //
+      // var columns = position.map(function (e) {
+      //   //TODO (S.Panfilov) check case for lines only ('6', '9', etc.)
+      //   return _this.getColumnNumber(e);
+      // });
+
+      // return lines - (columns * 0.1);
+      return +(this.getLineNumber(position) + (this.getColumnNumber(position) * 0.1));
+    },
     sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
-        return _p.getLineNumber(a) > _p.getLineNumber(b);
+        // return _p.getLineNumber(a) > _p.getLineNumber(b);
+        //TODO (S.Panfilov) test this approach
+        //TODO (S.Panfilov) This works in general, but single values has bad weight ('6', '9', etc.)
+        return _p.getPositionWeight(a) < _p.getPositionWeight(b);
       };
 
       return arr.sort(numberSort);
@@ -97,7 +117,7 @@ var Monkey = (function (config) {
     isIllegalKey: function (arr, fnArr) {
       for (var i = 0; i < arr.length; i++) {
         var positionKey = arr[i];
-        if (positionKey <= 0 || positionKey >= fnArr.length)  return true;//TODO (S.Panfilov) Cur work point
+        if (positionKey < 0 || positionKey >= fnArr.length)  return true;//TODO (S.Panfilov) Cur work point
       }
 
       return false;
