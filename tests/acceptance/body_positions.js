@@ -46,7 +46,14 @@ beforeEach(function () {
       return a + b; //line 15
     },
     line: function () {
-      return ""
+      //(_)//
+      //(_)//
+      //(_)//
+      //(_)//
+      //(_)//
+      //(_)//
+      //(_)//
+      return "________"//
     },
     oneLiner: function (a, b) {
       return 'OneLinerSum: ' + a + b;
@@ -377,119 +384,29 @@ describe('Body, modify at positions tests.', function () {
       //
       it('Inject at multiple lines and columns.', function () {
 
-        let counter = 0;
-
-        // function injectAtLine(line, column) {
-        //   const isColumn = !!column && column !== 0;
-        //   let result = `/*inject at line: ${line}`;
-        //   if (isColumn) result += `, and column: ${column}`;
-        //   result += `. Counter: ${counter} */`;
-        //   counter += 1;
-        //   return result;
-        // }
-
-        // var injectionValue = ' b + ';//injection to line 15 column 7
-        // var originFnArr = Utils.getFnArr(patchTarget.line, '\n');
-        //
-        // expect(patchTarget.executionCounter).to.be.equal(0);
-        // var originResult = patchTarget.sum(2, 3); //5
-        // expect(patchTarget.executionCounter).to.be.equal(1);
-        // expect(originResult).to.be.equal(5);
-
-        //TODO (S.Panfilov) uncomment
-        // new Monkey({
-        //   obj: patchTarget,
-        //   method: 'sum',
-        //   body: {
-        //     positions: {
-        //       5: injectAtLine.bind(this, 5),
-        //       '15,7': injectAtLine.bind(this, 15, 7),
-        //       '15,12': injectAtLine.bind(this, 15, 12),
-        //       '6,0': function () {
-        //         return injectAtLine(6, 0);
-        //       },
-        //       4: function () {
-        //         return injectAtLine(4);
-        //       },
-        //       '6,4': injectAtLine.bind(this, 6, 4),
-        //       '7,-1': injectAtLine.bind(this, 7, -1),
-        //       '7,3': () => {
-        //         return injectAtLine(7, 3);
-        //       },
-        //       '6,3': () => {
-        //         return injectAtLine(6, 3);
-        //       },
-        //       6: injectAtLine.bind(this, 6)
-        //     }
-        //   }
-        // });
-
         new Monkey({
           obj: patchTarget,
           method: 'line',
           body: {
             positions: {
-              '0,7': '2',
-              '0,-1': '3',
-              '0,8': '1',
-              '0': '5' ,
-              '0,-2': '4'
+              '7,8': 1,
+              '7,10': 2,
+              '7,12': 3,
+               '7,-6': 4,
+               '7,-4': 5,
+               '7': 6,
+
+              '0,3': 0,
+              '1,4': 1,
+              '2,5': 2,
+              '3,-3': 3,
+              '4,-2': 4,
+              '5,-1': 5,
+              '6': '//6'
             }
           }
         });
 
-        //Expected execution order
-        // '15,12': injectionValue,
-        // '15,7': injectionValue,
-        // 5: '// injection to line five(5)',
-        // '7,3': 'this is ',
-        // '7,-1': '(seven) ',
-        // '6,4': '// injection to line six(6), column two(2)',
-        // '6,3': '// injection to line six(6), column zero(0)',
-        // '6,0': '// injection to line six(6), column one(1)',
-        // 6: '// injection to line six(6)'
-        // 4: '// injection to line four(4)',
-
-
-        //Expected result
-        // 'use strict';//Line 0
-        //
-        // var line2 = 'Line 2';
-        // //Line 3
-        // var line4 = 'Line 4';
-        // var line5 = 'Line 5';
-        // var line6 = 'This is: ';//Line 6
-        // //Line 7
-        // var line8 = 'Line 8';
-        // //Line 9
-        // let line10 = /.*/g;
-        // const line11 = `Line 11 ${a + b}`;
-        // /*Line 12*/
-        // this.executionCounter += 1; //Line 13
-        //
-        // return /*inject at line: 15, and column: 7. Counter: 1 */a + b/*inject at line: 15, and column: 12. Counter: 0 */; //line 15
-
-
-        //Actual result:
-//         function anonymous(a,b
-//                            /**/) {
-//           'use strict';//Line 0
-//
-//           var line2 = 'Line 2';
-//           //Line 3
-//           var line4 = 'Line 4';/*inject at line: 4. Counter: 9 */
-//           var line5 = 'Line 5';/*inject at line: 5. Counter: 8 */
-//           /*inject at line: 6. Counter: 6 */v//*inject at line: 6, and column: 2. Counter: 5 */*inject at line: 6, and column: 1. Counter: 4 */ar line6 = 'This is: ';//Line 6/*inject at line: 6. Counter: 7 */
-// //L/*inject at line: 7, and column: 3. Counter: 2 */ine /*inject at line: 7, and column: -1. Counter: 3 */7
-//           var line8 = 'Line 8';
-//           //Line 9
-//           let line10 = /.*/g;
-//           const line11 = `Line 11 ${a + b}`;
-//           /*Line 12*/
-//           this.executionCounter += 1; //Line 13
-//
-//           return /*inject at line: 15, and column: 7. Counter: 1 */a + b/*inject at line: 15, and column: 12. Counter: 0 */; //line 15
-//         }
 
         //TODO (S.Panfilov) make sure that column injection order is desc:
         //TODO (S.Panfilov) '6,2', '6,1', '6,0', '6,-1', '6',

@@ -33,7 +33,7 @@ var Monkey = (function (config) {
       return +key.substr(key.indexOf(',') + 1);
     },
     getColumnAsDecimal: function (line, column) {
-      if (!column && column !== 0) return -(line + '.' +'99999');
+      if (!column && column !== 0) return -(line + '.' +'9999999');
 
       var isLower =column< 0;
       if (isLower) column *= -1;
@@ -76,6 +76,7 @@ var Monkey = (function (config) {
         //this is for named function
         if (fnName) fnStr = 'return function ' + fnName + ' () {' + fnStr + '};';
 
+        console.log(fnStr);
         result = new Function(fnArgs, fnStr);
       } else {
         //TODO (S.Panfilov) debug this branch
@@ -113,9 +114,13 @@ var Monkey = (function (config) {
       return arr;
     },
     isIllegalKey: function (arr, fnArr) {
+      var line;
+
       for (var i = 0; i < arr.length; i++) {
         var positionKey = arr[i];
-        if (positionKey < 0 || positionKey >= fnArr.length)  return true;//TODO (S.Panfilov) Cur work point
+        line = this.getLineNumber(positionKey);
+        //TODO (S.Panfilov) add getColumnNumber() > cur line length (or trim line length)
+        if (line < 0 || line >= fnArr.length)  return true;//TODO (S.Panfilov) Cur work point
       }
 
       return false;
