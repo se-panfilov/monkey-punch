@@ -32,13 +32,13 @@ var Monkey = (function (config) {
       if (commaIndex === -1) return null;
       return +key.substr(key.indexOf(',') + 1);
     },
-    getColumnAsDecimal: function (line, column) {
-      if (!column && column !== 0) return -(line + '.' +'9999999');
+    getColumnAsDecimal: function (column) {
+      if (!column && column !== 0) return -('0.' + '9999999');
 
-      var isLower =column< 0;
+      var isLower = column < 0;
       if (isLower) column *= -1;
 
-      var result = +(line + '.' + column);
+      var result = +('0.' + column);
 
       if (isLower) result *= -1;
 
@@ -48,7 +48,11 @@ var Monkey = (function (config) {
       var column = this.getColumnNumber(position);
       var line = +this.getLineNumber(position);
 
-      return line + this.getColumnAsDecimal(line, column);
+      //TODO (S.Panfilov) Cur work point
+      //TODO (S.Panfilov) The problem here is that '7,-3' have same weight as '6.7'
+      //TODO (S.Panfilov) But this is wrong, perhaps '7,-3' should become `6.700001` or smt
+      
+      return line + this.getColumnAsDecimal(column);
     },
     sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
@@ -130,7 +134,7 @@ var Monkey = (function (config) {
 
       if (this.isIllegalKey(positionsKeys, fnArr)) return console.error('Illegal key present');
 
-      for (var i = positionsKeys.length - 1; i >= 0; i--) {
+      for (var i = 0; i < positionsKeys.length; i++) {
         var positionKey = positionsKeys[i];
         var positionVal = positions[positionKey];
         this.injectAtLine(fnArr, positionKey, positionVal);

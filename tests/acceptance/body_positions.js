@@ -383,48 +383,75 @@ describe('Body, modify at positions tests.', function () {
       //     });
       //
       it('Inject at multiple lines and columns.', function () {
+        //The executing order should be like: '7,3', '7,2', '7,-1', '7,-2', '7', '6,2', '6,1', '6,0', '6,-1', '6,-2', '6',
+
+        //Expected order:
+        //     '7,8': 1,
+        //     '7,10': 2,
+        //     '7,12': 3,
+        //     '7,-6': 4,
+        //     '7,-4': 5,
+        //     '7': 6,
+        //
+        //     '0,3': 0,
+        //     '1,4': 1,
+        //     '2,5': 2,
+        //     '3,-3': 3,
+        //     '4,-2': 4,
+        //     '5,-1': 5,
+        //     '6': '//6'
 
         new Monkey({
           obj: patchTarget,
           method: 'line',
           body: {
+            //TODO (S.Panfilov) this should be in real test
+            // positions: {
+            //   '5,-1': 5,
+            //   '4,-2': 4,
+            //   '1,4': 1,
+            //   '2,5': 2,
+            //   '7,-4': 5,
+            //   '7,8': 1,
+            //   '7,-6': 4,
+            //   '7': 6,
+            //   '3,-3': 3,
+            //   '7,12': 3,
+            //   '6': '//6',
+            //   '0,3': 0,
+            //   '7,10': 2
+            // }
             positions: {
-              '7,8': 1,
-              '7,10': 2,
-              '7,12': 3,
-               '7,-6': 4,
-               '7,-4': 5,
-               '7': 6,
-
-              '0,3': 0,
-              '1,4': 1,
-              '2,5': 2,
-              '3,-3': 3,
-              '4,-2': 4,
-              '5,-1': 5,
-              '6': '//6'
+              '7,12': 3, //return "____x____"//
+              '7,10': 2, //return "__x__x____"//
+              '7,8': 1, //return "x__x__x____"//
+              '7,-3': 5, //return "x__x__x____x"//
+              '7,-6': 4, //return "x__x__x__x__x"//
+              '7': 6 //return "x__x__x__x__x"//x
             }
           }
         });
 
+        //return "____x____"//
+        //return "____3____"//
 
-        //TODO (S.Panfilov) make sure that column injection order is desc:
-        //TODO (S.Panfilov) '6,2', '6,1', '6,0', '6,-1', '6',
-        //TODO (S.Panfilov) '7,3', '7,-1'
-
-        //expect(patchTarget.executionCounter).to.be.equal(1);
-
-        //TODO (S.Panfilov) we should check the results but not right now
         var modifiedResult = patchTarget.line();
-        //var expectedResult = originResult + 3;
+        var expectedResult = "1__2__3__4__5";
 
-        //expect(patchTarget.executionCounter).to.be.equal(2);
-        // expect(modifiedResult).to.be.equal(expectedResult);
+        //TODO (S.Panfilov) uncomment
+        //expect(modifiedResult).to.be.equal(expectedResult);
 
         var modifiedFnArr = Utils.getFnArr(patchTarget.line, '\n');
 
-        var expectedLine = originFnArr[16].trim().slice(0, 7) + injectionValue + originFnArr[16].trim().slice(7);
-        expect(expectedLine).to.be.equal(modifiedFnArr[16 + 1]);
+        //TODO (S.Panfilov) uncomment
+        // expect('//(0_)//').to.be.equal(modifiedFnArr[2]);
+        // expect('//(_1)//').to.be.equal(modifiedFnArr[3]);
+        // expect('//(_)2//').to.be.equal(modifiedFnArr[4]);
+        // expect('//(_3)//').to.be.equal(modifiedFnArr[5]);
+        // expect('//(_)4//').to.be.equal(modifiedFnArr[6]);
+        // expect('//(_)/5/').to.be.equal(modifiedFnArr[7]);
+        // expect('//(_)////6').to.be.equal(modifiedFnArr[8]);
+        expect('return "1__2__3__4__5"//6').to.be.equal(modifiedFnArr[9]);
 
 
       });
