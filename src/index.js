@@ -59,6 +59,16 @@ var Monkey = (function (config) {
         return _p.getPositionWeight(a) < _p.getPositionWeight(b);
       };
 
+
+      var arr2 = arr.sort(numberSort);
+      var weightArr = [];
+      for (var i = 0; i < arr2.length; i++) {
+        var pos = arr2[i];
+        weightArr.push(`${pos}: ${_p.getPositionWeight(pos)}`);
+      }
+
+      console.log(weightArr);
+
       return arr.sort(numberSort);
     },
     getStrArr: function (fn, linesDelimiter) {
