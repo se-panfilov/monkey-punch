@@ -33,16 +33,21 @@ var Monkey = (function (config) {
       return +key.substr(key.indexOf(',') + 1);
     },
     getColumnAsDecimal: function (column) {
-      if (!column && column !== 0) return -('0.' + '9999999');
+      if (!column && column !== 0) return 0.00999999999;
 
+      var result;
       var isLower = column < 0;
-      if (isLower) column *= -1;
 
-      var result = +('0.' + column);
+      if (isLower) {
+        column *= -1;
+        result = '0.00' + column;
+      } else {
+        result = '0.' + column;
+      }
 
-      if (isLower) result *= -1;
+      // if (isLower) result *= -1;
 
-      return result;
+      return +result;
     },
     getPositionWeight: function (position) {
       var column = this.getColumnNumber(position);
@@ -51,7 +56,8 @@ var Monkey = (function (config) {
       //TODO (S.Panfilov) Cur work point
       //TODO (S.Panfilov) The problem here is that '7,-3' have same weight as '6.7'
       //TODO (S.Panfilov) But this is wrong, perhaps '7,-3' should become `6.700001` or smt
-      
+      //TODO (S.Panfilov) Another problem is '7,10' = 7.1, and '7,8' = 7.8, but '7,10' should be > '7,8'
+
       return line + this.getColumnAsDecimal(column);
     },
     sortNumberArr: function (arr) {
