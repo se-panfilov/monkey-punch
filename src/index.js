@@ -23,7 +23,7 @@ var Monkey = (function (config) {
     getLineNumber: function (key) {
       key = key.trim();
       var commaIndex = key.indexOf(',');
-      if (commaIndex === -1) return key;
+      if (commaIndex === -1) return +key;
       return +key.substr(0, key.indexOf(','));
     },
     getColumnNumber: function (key) {
@@ -57,23 +57,66 @@ var Monkey = (function (config) {
       //TODO (S.Panfilov) The problem here is that '7,-3' have same weight as '6.7'
       //TODO (S.Panfilov) But this is wrong, perhaps '7,-3' should become `6.700001` or smt
       //TODO (S.Panfilov) Another problem is '7,10' = 7.1, and '7,8' = 7.8, but '7,10' should be > '7,8'
+      //TODO (S.Panfilov) I think approach with weight is more elegant than with 'IFs'.
+      //TODO (S.Panfilov) Read more about sorting of complex numbers
 
       return line + this.getColumnAsDecimal(column);
     },
     sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
-        return _p.getPositionWeight(a) < _p.getPositionWeight(b);
+        // return _p.getPositionWeight(a) < _p.getPositionWeight(b);
+        // var column = this.getColumnNumber(position);
+        // var line = +this.getLineNumber(position);
+
+        //TODO (S.Panfilov) ugly test approach
+
+        var isLineUpper = _p.getLineNumber(a) > _p.getLineNumber(b);
+        var isLineLower = _p.getLineNumber(a) < _p.getLineNumber(b);
+        var isColumnUpper = _p.getColumnNumber(a) > _p.getColumnNumber(b);
+        var isColumnLower = _p.getColumnNumber(a) < _p.getColumnNumber(b);
+        var isColumnPositive = _p.getColumnNumber(a) > 0 ;
+
+        var isColumnA = _p.getColumnNumber(a) !== null;
+        var isColumnB = _p.getColumnNumber(b) !== null;
+
+        if (isLineUpper) return true; // a > b
+        if (isLineLower) return false; // a < b
+        if (_p.getLineNumber(a) === _p.getLineNumber(b)) {
+
+          // if (isColumnUpper && isColumnPositive && _p.getColumnNumber(b) > 0) {
+          if (!isColumnA){// a < b
+            return false;
+          } else if (!isColumnB){ // a > b
+            return true;
+          } else if (isColumnUpper && isColumnPositive) { // a > b (a > 0)
+            return true;
+          // } else if (isColumnLower && !isColumnPositive && _p.getColumnNumber(b) < 0) {
+          //} else if (isColumnLower && !isColumnPositive) {
+          } else if (isColumnUpper && !isColumnPositive) { // a < b
+            return false;
+          }
+          // else if (!isColumnA && isColumnB) {
+          //   return false;
+          // } else if (!isColumnB && isColumnA) {
+          //   return true;
+          // } else {
+          //   return false
+          // }
+        }
+
+
       };
 
 
-      var arr2 = arr.sort(numberSort);
-      var weightArr = [];
-      for (var i = 0; i < arr2.length; i++) {
-        var pos = arr2[i];
-        weightArr.push(`${pos}: ${_p.getPositionWeight(pos)}`);
-      }
+       var arr2 = arr.sort(numberSort);
+      console.log(arr2);
+      // var weightArr = [];
+      // for (var i = 0; i < arr2.length; i++) {
+      //   var pos = arr2[i];
+      //   weightArr.push(`${pos}: ${_p.getPositionWeight(pos)}`);
+      // }
 
-      console.log(weightArr);
+      //console.log(weightArr);
 
       return arr.sort(numberSort);
     },

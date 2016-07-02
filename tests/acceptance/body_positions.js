@@ -383,7 +383,7 @@ describe('Body, modify at positions tests.', function () {
       //     });
       //
       it('Inject at multiple lines and columns.', function () {
-        //The executing order should be like: '7,3', '7,2', '7,-1', '7,-2', '7', '6,2', '6,1', '6,0', '6,-1', '6,-2', '6',
+        //The executing order should be like: '7,3', '7,2', '7,-2', '7,-1', '7', '6,2', '6,1', '6,0', '6,-2', '6,-1', '6',
 
         //Expected order:
         //     '7,8': 1,
