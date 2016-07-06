@@ -51,48 +51,23 @@ var Monkey = (function (config) {
     // },
     getColumnWeight: function (position) {
       var column = this.getColumnNumber(position);
-
-      //12
-      //10
-      //8
-      //0
-      //-6
-      //-4
-      //null
-
       if (!column && column !== 0) return -Infinity;
       return column;
     },
     compareColumns: function (a, b) {
-      if (a === -Infinity) return true;
-      if (b === -Infinity) return false;
-      if (a < 0 && b < 0) {
-        return a > b
+      if (a < 0 && a > -Infinity && b < 0 && b > -Infinity) {
+        return a - b
       }
-      return a < b
+      return b - a
     },
     sortNumberArr: function (arr) {
-
-
-      var lineSort = function (a, b) {
-         return _p.getLineNumber(b) - _p.getLineNumber(a)
+      var numberSort = function (a, b) {
+        if (_p.getLineNumber(a) === _p.getLineNumber(b)) {
+          return _p.compareColumns(_p.getColumnWeight(a), _p.getColumnWeight(b));
+        } else {
+          return _p.getLineNumber(b) - _p.getLineNumber(a)
+        }
       };
-
-      var columnSort = function (a, b) {
-        //TODO (S.Panfilov) Cur work point
-        return _p.compareColumns(_p.getColumnWeight(a), _p.getColumnWeight(b));
-      };
-
-      arr = arr.sort(lineSort);
-      arr = arr.sort(columnSort);
-      console.log(arr);
-      // var weightArr = [];
-      // for (var i = 0; i < arr2.length; i++) {
-      //   var pos = arr2[i];
-      //   weightArr.push(`${pos}: ${_p.getPositionWeight(pos)}`);
-      // }
-
-      //console.log(weightArr);
 
       return arr.sort(numberSort);
     },
