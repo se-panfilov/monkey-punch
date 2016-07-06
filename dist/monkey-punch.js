@@ -3,44 +3,59 @@ var Monkey = (function (config) {
 
   if (!config) console.error('Error: no config');
 
-  config.linesDelimiter = config.linesDelimiter || '\n';
-
-  //TODO (S.Panfilov) return errors for out of range
-  // if (config._maxLineKey > linesCount) {
-  //   console.error('Error: line number too big');
-  //   return;
-  // }
-  //
-  // if (config._minLineKey <= 0) {
-  //   console.error('Error: line number too lower than 0');
-  //   return;
-  // }
+  config.body.linesDelimiter = config.body.linesDelimiter || '\n';
 
   var isBefore = !!config.before;
   var isAfter = !!config.after;
 
   var _p = {
-    override: function (cb) {
-      var object = config.obj;
-      var method = config.method;
-      object[method] = cb(object[method]);
-      console.log(1);
-    },
     getLineNumber: function (key) {
       key = key.trim();
       var commaIndex = key.indexOf(',');
-      if (commaIndex === -1) return key;
+      if (commaIndex === -1) return +key;
       return +key.substr(0, key.indexOf(','));
     },
     getColumnNumber: function (key) {
       key = key.trim();
       var commaIndex = key.indexOf(',');
-      if (commaIndex === -1) return 0;
+      if (commaIndex === -1) return null;
       return +key.substr(key.indexOf(',') + 1);
+    },
+    // getColumnAsDecimal: function (column) {
+    //   if (!column && column !== 0) return 0.00999999999;
+    //
+    //   var result;
+    //   var isLower = column < 0;
+    //
+    //   if (isLower) {
+    //     column *= -1;
+    //     result = '0.00' + column;
+    //   } else {
+    //     result = '0.' + column;
+    //   }
+    //
+    //   // if (isLower) result *= -1;
+    //
+    //   return +result;
+    // },
+    getColumnWeight: function (position) {
+      var column = this.getColumnNumber(position);
+      if (!column && column !== 0) return -Infinity;
+      return column;
+    },
+    compareColumns: function (a, b) {
+      if (a < 0 && a > -Infinity && b < 0 && b > -Infinity) {
+        return a - b
+      }
+      return b - a
     },
     sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
-        return this.getLineNumber(a) > this.getLineNumber(b)
+        if (_p.getLineNumber(a) === _p.getLineNumber(b)) {
+          return _p.compareColumns(_p.getColumnWeight(a), _p.getColumnWeight(b));
+        } else {
+          return _p.getLineNumber(b) - _p.getLineNumber(a)
+        }
       };
 
       return arr.sort(numberSort);
@@ -54,44 +69,73 @@ var Monkey = (function (config) {
       fnArr.splice(fnArr.length - 1, 1);
       return fnArr;
     },
-    makeFn: function (fnArr, linesDelimiter) {
-      var fnName = this.getFnName(config.method);
+    makeFn: function (fnArr, originalFn, linesDelimiter, isEval) {
+      var fnName = this.getFnName(originalFn);
       var fnStr = fnArr.join(linesDelimiter);
-      var fnArgs = this.getParamNames(config.method);
+      var fnArgs = this.getParamNames(originalFn);
+      var result;
 
-      //this is for named function
-      if (fnName) fnStr = 'return function ' + fnName + ' () {' + fnStr + '};';
-      return new Function(fnArgs, fnStr);
+      if (!isEval) {
+        //this is for named function
+        if (fnName) fnStr = 'return function ' + fnName + ' () {' + fnStr + '};';
+
+        result = new Function(fnArgs, fnStr);
+      } else {
+        //TODO (S.Panfilov) debug this branch
+        //TODO (S.Panfilov) what about comma at the end?
+        result = eval('(function ' + fnName + '(' + fnArgs.toString + ') {' + fnStr + '})');
+      }
+      return result;
     },
-    modifyBody: function (bodyConfig) {
-      var fnArr = this.getStrArr(config.obj[config.method], config.linesDelimiter);
-
+    modifyBody: function (fnArr, bodyConfig) {
       if (bodyConfig.positions)  fnArr = this.modifyAtPositions(fnArr, bodyConfig.positions);
       if (bodyConfig.regexps)  fnArr = this.modifyAtRegexp(fnArr, bodyConfig.regexps);
       return fnArr;
     },
-    injectLine: function (arr, position, val) {
+    injectAtLine: function (arr, position, val) {
       var line = this.getLineNumber(position);
       var column = this.getColumnNumber(position);
+      var isNoColumn = !column && column !== 0;
 
-      if (column > arr[line].length) column = arr.length;
+      //TODO (S.Panfilov) this should be in docs (we are trimming the lines)
+      arr[line] = arr[line].trim();
 
-      if (column > 0) {
-        arr.splice(line, 0, val);
-      } else {
-        arr[line] = arr[line].slice(0, column) + val + arr[line].slice(column);
-      }
+      if (column > arr[line].length || isNoColumn) column = arr[line].length;
+
+      // if (column > 0) {
+      // arr.splice(line, 0, val);
+      // } else {
+      //TODO (S.Panfilov) here we inject the result of 'val()', but perhaps will be better to pass function here somehow
+      //TODO (S.Panfilov) the idea is to run val() when only modified function will be called
+      //TODO (S.Panfilov) and to have an ability to pass context here
+      //TODO (S.Panfilov) in this case would be a reason to call val's cb
+      if (typeof val === 'function') val = val();
+      arr[line] = arr[line].slice(0, column) + val + arr[line].slice(column);
+      // }
 
       return arr;
+    },
+    isIllegalKey: function (arr, fnArr) {
+      var line;
+
+      for (var i = 0; i < arr.length; i++) {
+        var positionKey = arr[i];
+        line = this.getLineNumber(positionKey);
+        //TODO (S.Panfilov) add getColumnNumber() > cur line length (or trim line length)
+        if (line < 0 || line >= fnArr.length)  return true;//TODO (S.Panfilov) Cur work point
+      }
+
+      return false;
     },
     modifyAtPositions: function (fnArr, positions) {
       var positionsKeys = this.sortNumberArr(Object.keys(positions));
 
-      for (var i = positionsKeys.length - 1; i >= 0; i--) {
+      if (this.isIllegalKey(positionsKeys, fnArr)) return console.error('Illegal key present');
+
+      for (var i = 0; i < positionsKeys.length; i++) {
         var positionKey = positionsKeys[i];
-        var positionVal = positions[positionsKeys];
-        //TODO (S.Panfilov) cur work point
-        this.injectLine(fnArr, positionKey, positionVal);
+        var positionVal = positions[positionKey];
+        this.injectAtLine(fnArr, positionKey, positionVal);
       }
 
       return fnArr;
@@ -113,7 +157,7 @@ var Monkey = (function (config) {
             //(asd.toString()).search(/\)\n/g)
             var match;
             var matchesArr = [];
-            while ((match = regex.exec(fnStr)) != null) {
+            while ((match = regex.exec(fnStr)) !== null) {
               matchesArr.push(match.index);
             }
 
@@ -130,9 +174,7 @@ var Monkey = (function (config) {
         }
       }
 
-
-      return this.getStrArr(fnArr, config.linesDelimiter);
-
+      return this.getStrArr(fnArr, config.body.linesDelimiter);
     },
     getFnName: function (fn) {
       if (fn.name) return fn.name;
@@ -154,32 +196,37 @@ var Monkey = (function (config) {
 
   var exports = {
     config: config,
-    original: null,
-    linesDelimiter: config.linesDelimiter,
+    originalFn: null,
+    modifiedFn: null,
+    linesDelimiter: config.body.linesDelimiter,
     before: config.before,
     after: config.after,
-    isModified: false,
-    modifiedFnBody: null,
     isLazy: false,
     punch: function () {
-      //TODO (S.Panfilov) refactor work with override
-      
-      _p.override(function (original) {
-        exports.original = original;
-        return function () {
-          this.isModified = true;
-          if (isBefore) this.before.apply(this, arguments);
-          if (config.body) {
-            var fnArr = _p.modifyBody(config.body);
-            this.modifiedFnBody = fnArr.join(this.linesDelimiter);
-            original = _p.makeFn(fnArr, this.linesDelimiter)
-          }
-          var returnValue = original.apply(this, arguments);
-          if (isAfter) this.after.apply(this, arguments);
+      this.originalFn = this.config.obj[this.config.method];
+
+      if (this.config.body) {
+        this.modifiedFn = this.config.obj[this.config.method];
+        var fnArr = _p.getStrArr(this.modifiedFn, this.linesDelimiter);
+        _p.modifyBody(fnArr, config.body);
+        this.modifiedFn = _p.makeFn(fnArr, this.originalFn, this.linesDelimiter);
+      }
+
+      if (!this.before && !this.after) {
+        this.config.obj[this.config.method] = this.modifiedFn || this.originalFn;
+      } else {
+        var self = this;
+        this.config.obj[this.config.method] = function () {
+
+          if (isBefore) self.before(arguments);
+
+          var returnValue = (self.modifiedFn) ? self.modifiedFn(arguments) : self.originalFn(arguments);
+
+          if (isAfter) self.after(arguments);
 
           return returnValue;
-        }
-      });
+        };
+      }
 
       return this;
     },
@@ -203,19 +250,25 @@ var Monkey = (function (config) {
 //Support of node.js
 if (typeof module === 'object' && module.exports) module.exports = Monkey;
 
-//Roadmap:
-//TODO (S.Panfilov) Add support for one-liners
-//TODO (S.Panfilov) Add support for functions as well as strings in body params
-//TODO (S.Panfilov) add "punch": ability to patch func agaig after restore was called
-//TODO (S.Panfilov) Add "Lazy" option (do not patch immediately)
+//TODO (S.Panfilov) Roadmap:
+// - Add support for one-liners
+// - Add "punch": ability to patch func again after restore was called
+// - Add "Lazy" option (do not patch immediately)
+// - Add ability to patch several methods at once (in arr of str)
+// - Add ability to use eval instead of new Func
+// - make sure column can be set up from the end (-1)
+// - Before and After should be called with same args as origin
+// - Check closures and globals in terms of new Func
 
 // var myMonkey = new Monkey({
 //   obj: patchTarget,
-//   method: 'sum',
-//   linesDelimiter: '\n',
-//   before: doItBefore,
-//   after: doItAfter,
+//   method: ['sum', 'min'], //patch one (string) or several methods (array of str)
+//   before: doItBefore, //only function here
+//   after: doItAfter, // should be called with same args as origin
+//   isLazy: false, // lazy allow you to not patch immediately
 //   body: {
+//     linesDelimiter: '\n',
+//     isEval: false, //option to use eval instead of new Function
 //     regexps: {
 //       '/\)\n/g': addSemiQuoteFn, // add ';' after each ')'
 //       '/\{/g': ' ' // add space before each'{'
@@ -225,7 +278,8 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 //       5: '// injection to line five',
 //       2: lineTwoInjectionFunc,
 //       '6,10': '// Injection to line 6 column 10',
-//       '2,3': lineTwoColumnThreeInjectionFunc
+//       '2,3': lineTwoColumnThreeInjectionFunc,
+//       '2,-1': lineTwoColumnOneFromEndInjectionFunc
 //     }
 //   }
 // });
