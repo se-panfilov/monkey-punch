@@ -422,12 +422,12 @@ describe('Body, modify at positions tests.', function () {
             //   '7,10': 2
             // }
             positions: {
-              // '7,12': 3, //return "____x____"//
-              // '7,10': 2, //return "__x__x____"//
-              // '7,8': 1, //return "x__x__x____"//
-              // '7,-3': 5, //return "x__x__x____x"//
-              // '7,-6': 4, //return "x__x__x__x__x"//
-              // '7': 6, //return "x__x__x__x__x"//x
+              '7,12': 3, //return "____x____"//
+              '7,10': 2, //return "__x__x____"//
+              '7,8': 1, //return "x__x__x____"//
+              '7,-3': 5, //return "x__x__x____x"//
+              '7,-6': 4, //return "x__x__x__x__x"//
+              '7': 6, //return "x__x__x__x__x"//x
               '6,12': 3, //return "____x____"//
               '6,10': 2, //return "__x__x____"//
               '6,8': 1, //return "x__x__x____"//
@@ -435,6 +435,8 @@ describe('Body, modify at positions tests.', function () {
               '6,-3': 5, //return "x__x__x____x"//
               '6,-6': 4, //return "x__x__x__x__x"//
               '6': 6 //return "x__x__x__x__x"//x
+
+
             }
           }
         });

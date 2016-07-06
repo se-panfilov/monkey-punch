@@ -72,18 +72,20 @@ var Monkey = (function (config) {
       return a < b
     },
     sortNumberArr: function (arr) {
-      var numberSort = function (a, b) {
-        //TODO (S.Panfilov) Cur work point
-        if (_p.getLineNumber(a) === _p.getLineNumber(b)) {
-          return _p.compareColumns(_p.getColumnWeight(a), _p.getColumnWeight(b));
-        } else {
-          return _p.getLineNumber(a) < _p.getLineNumber(b)
-        }
+
+
+      var lineSort = function (a, b) {
+         return _p.getLineNumber(b) - _p.getLineNumber(a)
       };
 
+      var columnSort = function (a, b) {
+        //TODO (S.Panfilov) Cur work point
+        return _p.compareColumns(_p.getColumnWeight(a), _p.getColumnWeight(b));
+      };
 
-      var arr2 = arr.sort(numberSort);
-      console.log(arr2);
+      arr = arr.sort(lineSort);
+      arr = arr.sort(columnSort);
+      console.log(arr);
       // var weightArr = [];
       // for (var i = 0; i < arr2.length; i++) {
       //   var pos = arr2[i];
