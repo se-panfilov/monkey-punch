@@ -32,79 +32,39 @@ var Monkey = (function (config) {
       if (commaIndex === -1) return null;
       return +key.substr(key.indexOf(',') + 1);
     },
-    getColumnAsDecimal: function (column) {
-      if (!column && column !== 0) return 0.00999999999;
-
-      var result;
-      var isLower = column < 0;
-
-      if (isLower) {
-        column *= -1;
-        result = '0.00' + column;
-      } else {
-        result = '0.' + column;
-      }
-
-      // if (isLower) result *= -1;
-
-      return +result;
-    },
-    getPositionWeight: function (position) {
+    // getColumnAsDecimal: function (column) {
+    //   if (!column && column !== 0) return 0.00999999999;
+    //
+    //   var result;
+    //   var isLower = column < 0;
+    //
+    //   if (isLower) {
+    //     column *= -1;
+    //     result = '0.00' + column;
+    //   } else {
+    //     result = '0.' + column;
+    //   }
+    //
+    //   // if (isLower) result *= -1;
+    //
+    //   return +result;
+    // },
+    getColumnWeight: function (position) {
       var column = this.getColumnNumber(position);
       var line = +this.getLineNumber(position);
 
       //TODO (S.Panfilov) Cur work point
-      //TODO (S.Panfilov) The problem here is that '7,-3' have same weight as '6.7'
-      //TODO (S.Panfilov) But this is wrong, perhaps '7,-3' should become `6.700001` or smt
-      //TODO (S.Panfilov) Another problem is '7,10' = 7.1, and '7,8' = 7.8, but '7,10' should be > '7,8'
-      //TODO (S.Panfilov) I think approach with weight is more elegant than with 'IFs'.
-      //TODO (S.Panfilov) Read more about sorting of complex numbers
+      //The idea is to compare only columns by specific rules
 
       return line + this.getColumnAsDecimal(column);
     },
     sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
-        // return _p.getPositionWeight(a) < _p.getPositionWeight(b);
+        if  (_p.getLineNumber(a) > _p.getLineNumber(b)) return true;
+        if  (_p.getColumnWeight(a) < _p.getColumnWeight(b)) return true;
+
         // var column = this.getColumnNumber(position);
         // var line = +this.getLineNumber(position);
-
-        //TODO (S.Panfilov) ugly test approach
-
-        var isLineUpper = _p.getLineNumber(a) > _p.getLineNumber(b);
-        var isLineLower = _p.getLineNumber(a) < _p.getLineNumber(b);
-        var isColumnUpper = _p.getColumnNumber(a) > _p.getColumnNumber(b);
-        var isColumnLower = _p.getColumnNumber(a) < _p.getColumnNumber(b);
-        var isColumnPositive = _p.getColumnNumber(a) > 0 ;
-
-        var isColumnA = _p.getColumnNumber(a) !== null;
-        var isColumnB = _p.getColumnNumber(b) !== null;
-
-        if (isLineUpper) return true; // a > b
-        if (isLineLower) return false; // a < b
-        if (_p.getLineNumber(a) === _p.getLineNumber(b)) {
-
-          // if (isColumnUpper && isColumnPositive && _p.getColumnNumber(b) > 0) {
-          if (!isColumnA){// a < b
-            return false;
-          } else if (!isColumnB){ // a > b
-            return true;
-          } else if (isColumnUpper && isColumnPositive) { // a > b (a > 0)
-            return true;
-          // } else if (isColumnLower && !isColumnPositive && _p.getColumnNumber(b) < 0) {
-          //} else if (isColumnLower && !isColumnPositive) {
-          } else if (isColumnUpper && !isColumnPositive) { // a < b
-            return false;
-          }
-          // else if (!isColumnA && isColumnB) {
-          //   return false;
-          // } else if (!isColumnB && isColumnA) {
-          //   return true;
-          // } else {
-          //   return false
-          // }
-        }
-
-
       };
 
 
