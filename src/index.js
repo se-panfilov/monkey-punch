@@ -5,17 +5,6 @@ var Monkey = (function (config) {
 
   config.body.linesDelimiter = config.body.linesDelimiter || '\n';
 
-  //TODO (S.Panfilov) return errors for out of range
-  // if (config._maxLineKey > linesCount) {
-  //   console.error('Error: line number too big');
-  //   return;
-  // }
-  //
-  // if (config._minLineKey <= 0) {
-  //   console.error('Error: line number too lower than 0');
-  //   return;
-  // }
-
   var isBefore = !!config.before;
   var isAfter = !!config.after;
 
@@ -90,7 +79,6 @@ var Monkey = (function (config) {
         //this is for named function
         if (fnName) fnStr = 'return function ' + fnName + ' () {' + fnStr + '};';
 
-        console.log(fnStr);
         result = new Function(fnArgs, fnStr);
       } else {
         //TODO (S.Panfilov) debug this branch
