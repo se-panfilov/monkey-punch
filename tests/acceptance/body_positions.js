@@ -429,23 +429,24 @@ describe('Body, modify at positions tests.', function () {
           }
         };
 
+        //Same modifiers in different order
         new Monkey({
           obj: otherPatchTarget,
           method: 'otherLine',
           body: {
             positions: {
-              '7,12': 3, //return "____x____"//
-              '7,10': 2, //return "__x__x____"//
-              '7,8': 1, //return "x__x__x____"//
-              '7,-5': 4, //return "x__x__x__x__"//
-              '7,-3': 5, //return "x__x__x__x__x"//
-              '7': 6, //return "x__x__x__x__x"//x
               '6,3': 3, //(x_)//
               '6,2': 2, //x(x_)//
-              '6,0': '//1', //x//x(x_)//
+              '7,12': 3, //return "____x____"//
               '6,-3': 4, //x//x(x_x)//
-              '6,-2': 5, //x//x(x_x)x//
-              '6': 6 //x//x(x_x)x//x
+              '7,10': 2, //return "__x__x____"//
+              '7,-5': 4, //return "x__x__x__x__"//
+              '6': 6, //x//x(x_x)x//x
+              '6,0': '//1', //x//x(x_)//
+              '7': 6, //return "x__x__x__x__x"//x
+              '7,-3': 5, //return "x__x__x__x__x"//
+              '7,8': 1, //return "x__x__x____"//
+              '6,-2': 5 //x//x(x_x)x//
             }
           }
         });
