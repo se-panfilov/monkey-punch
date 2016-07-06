@@ -51,24 +51,38 @@ var Monkey = (function (config) {
     // },
     getColumnWeight: function (position) {
       var column = this.getColumnNumber(position);
-      var line = +this.getLineNumber(position);
 
-      //TODO (S.Panfilov) Cur work point
-      //The idea is to compare only columns by specific rules
+      //12
+      //10
+      //8
+      //0
+      //-6
+      //-4
+      //null
 
-      return line + this.getColumnAsDecimal(column);
+      if (!column && column !== 0) return -Infinity;
+      return column;
+    },
+    compareColumns: function (a, b) {
+      if (a === -Infinity) return true;
+      if (b === -Infinity) return false;
+      if (a < 0 && b < 0) {
+        return a > b
+      }
+      return a < b
     },
     sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
-        if  (_p.getLineNumber(a) > _p.getLineNumber(b)) return true;
-        if  (_p.getColumnWeight(a) < _p.getColumnWeight(b)) return true;
-
-        // var column = this.getColumnNumber(position);
-        // var line = +this.getLineNumber(position);
+        //TODO (S.Panfilov) Cur work point
+        if (_p.getLineNumber(a) === _p.getLineNumber(b)) {
+          return _p.compareColumns(_p.getColumnWeight(a), _p.getColumnWeight(b));
+        } else {
+          return _p.getLineNumber(a) < _p.getLineNumber(b)
+        }
       };
 
 
-       var arr2 = arr.sort(numberSort);
+      var arr2 = arr.sort(numberSort);
       console.log(arr2);
       // var weightArr = [];
       // for (var i = 0; i < arr2.length; i++) {
