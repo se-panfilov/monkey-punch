@@ -91,7 +91,7 @@ describe('Body, modify at positions tests.', function () {
           body: {
             positions: {
               2: injectionValue2,
-              5: injectionValue5,
+              '5': injectionValue5,
               1: injectionValue1
             }
           }
@@ -612,24 +612,6 @@ describe('Body, modify at positions tests.', function () {
     //   });
 
   });
-
-  //==============================================================
-
-  // new Monkey({
-  //   obj: patchTarget,
-  //   method: 'sum',
-  //   body: {
-  //     positions: {
-  //       1: '// injection to line one(1)',
-  //       5: '// injection to line five(5)',
-  //       2: '// injection to line two(2)',
-  //       '6,10': '// Injection to line 6 column 10',
-  //       '2,3': lineTwoColumnThreeInjectionFunc
-  //     }
-  //   }
-  // });
-
-  //==============================================================
 
   // it('Patch value from closure.', function () {
   //   var pureResult = patchTarget.sum(1, 1);
