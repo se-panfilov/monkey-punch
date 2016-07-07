@@ -5,17 +5,6 @@ var Monkey = (function (config) {
 
   config.body.linesDelimiter = config.body.linesDelimiter || '\n';
 
-  //TODO (S.Panfilov) return errors for out of range
-  // if (config._maxLineKey > linesCount) {
-  //   console.error('Error: line number too big');
-  //   return;
-  // }
-  //
-  // if (config._minLineKey <= 0) {
-  //   console.error('Error: line number too lower than 0');
-  //   return;
-  // }
-
   var isBefore = !!config.before;
   var isAfter = !!config.after;
 
@@ -23,7 +12,7 @@ var Monkey = (function (config) {
     getLineNumber: function (key) {
       key = key.trim();
       var commaIndex = key.indexOf(',');
-      if (commaIndex === -1) return key;
+      if (commaIndex === -1) return +key;
       return +key.substr(0, key.indexOf(','));
     },
     getColumnNumber: function (key) {
@@ -32,9 +21,41 @@ var Monkey = (function (config) {
       if (commaIndex === -1) return null;
       return +key.substr(key.indexOf(',') + 1);
     },
+    // getColumnAsDecimal: function (column) {
+    //   if (!column && column !== 0) return 0.00999999999;
+    //
+    //   var result;
+    //   var isLower = column < 0;
+    //
+    //   if (isLower) {
+    //     column *= -1;
+    //     result = '0.00' + column;
+    //   } else {
+    //     result = '0.' + column;
+    //   }
+    //
+    //   // if (isLower) result *= -1;
+    //
+    //   return +result;
+    // },
+    getColumnWeight: function (position) {
+      var column = this.getColumnNumber(position);
+      if (!column && column !== 0) return -Infinity;
+      return column;
+    },
+    compareColumns: function (a, b) {
+      if (a < 0 && a > -Infinity && b < 0 && b > -Infinity) {
+        return a - b
+      }
+      return b - a
+    },
     sortNumberArr: function (arr) {
       var numberSort = function (a, b) {
-        return _p.getLineNumber(a) > _p.getLineNumber(b);
+        if (_p.getLineNumber(a) === _p.getLineNumber(b)) {
+          return _p.compareColumns(_p.getColumnWeight(a), _p.getColumnWeight(b));
+        } else {
+          return _p.getLineNumber(b) - _p.getLineNumber(a)
+        }
       };
 
       return arr.sort(numberSort);
@@ -76,6 +97,9 @@ var Monkey = (function (config) {
       var column = this.getColumnNumber(position);
       var isNoColumn = !column && column !== 0;
 
+      //TODO (S.Panfilov) this should be in docs (we are trimming the lines)
+      arr[line] = arr[line].trim();
+
       if (column > arr[line].length || isNoColumn) column = arr[line].length;
 
       // if (column > 0) {
@@ -92,9 +116,13 @@ var Monkey = (function (config) {
       return arr;
     },
     isIllegalKey: function (arr, fnArr) {
+      var line;
+
       for (var i = 0; i < arr.length; i++) {
         var positionKey = arr[i];
-        if (positionKey <= 0 || positionKey >= fnArr.length)  return true;//TODO (S.Panfilov) Cur work point
+        line = this.getLineNumber(positionKey);
+        //TODO (S.Panfilov) add getColumnNumber() > cur line length (or trim line length)
+        if (line < 0 || line >= fnArr.length)  return true;//TODO (S.Panfilov) Cur work point
       }
 
       return false;
@@ -104,7 +132,7 @@ var Monkey = (function (config) {
 
       if (this.isIllegalKey(positionsKeys, fnArr)) return console.error('Illegal key present');
 
-      for (var i = positionsKeys.length - 1; i >= 0; i--) {
+      for (var i = 0; i < positionsKeys.length; i++) {
         var positionKey = positionsKeys[i];
         var positionVal = positions[positionKey];
         this.injectAtLine(fnArr, positionKey, positionVal);
@@ -224,10 +252,9 @@ if (typeof module === 'object' && module.exports) module.exports = Monkey;
 
 //TODO (S.Panfilov) Roadmap:
 // - Add support for one-liners
-// - Add support for functions as well as strings in body params
 // - Add "punch": ability to patch func again after restore was called
 // - Add "Lazy" option (do not patch immediately)
-// - Add ability to patch several methods at once/
+// - Add ability to patch several methods at once (in arr of str)
 // - Add ability to use eval instead of new Func
 // - make sure column can be set up from the end (-1)
 // - Before and After should be called with same args as origin
