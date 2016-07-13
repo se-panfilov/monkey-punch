@@ -3,7 +3,7 @@ var Monkey = (function (config) {
 
   if (!config) console.error('Error: no config');
 
-  config.body.linesDelimiter = config.body.linesDelimiter || '\n';
+  if (config.body) config.body.linesDelimiter = config.body.linesDelimiter || '\n';
 
   var isBefore = !!config.before;
   var isAfter = !!config.after;
@@ -198,7 +198,6 @@ var Monkey = (function (config) {
     config: config,
     originalFn: null,
     modifiedFn: null,
-    linesDelimiter: config.body.linesDelimiter,
     before: config.before,
     after: config.after,
     isLazy: false,
@@ -216,16 +215,22 @@ var Monkey = (function (config) {
         this.config.obj[this.config.method] = this.modifiedFn || this.originalFn;
       } else {
         var self = this;
+
         this.config.obj[this.config.method] = function () {
+          console.log(222);
+          console.log(this);
+          console.log(333);
+          console.log(self.config.obj);
+          if (isBefore) self.before.bind(this, arguments);
 
-          if (isBefore) self.before(arguments);
+          var fn = self.modifiedFn ? self.modifiedFn : self.originalFn;
+          fn.bind(this, arguments);
+          var returnValue = fn();
 
-          var returnValue = (self.modifiedFn) ? self.modifiedFn(arguments) : self.originalFn(arguments);
-
-          if (isAfter) self.after(arguments);
+          if (isAfter) self.after.bind(this, arguments);
 
           return returnValue;
-        };
+        }.bind(this.config.obj)
       }
 
       return this;
@@ -241,6 +246,8 @@ var Monkey = (function (config) {
       return this;
     }
   };
+
+  if (config.body) exports.linesDelimiter = config.body.linesDelimiter;
 
   if (!exports.isLazy) return exports.punch();
 
