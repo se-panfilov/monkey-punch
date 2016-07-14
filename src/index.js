@@ -8,6 +8,7 @@ var Monkey = (function (config) {
   var isBefore = !!config.before;
   var isAfter = !!config.after;
 
+  //TODO (S.Panfilov) think about move this to prototype
   var _p = {
     getLineNumber: function (key) {
       key = key.trim();
@@ -88,6 +89,7 @@ var Monkey = (function (config) {
       return result;
     },
     modifyBody: function (fnArr, bodyConfig) {
+      //TODO (S.Panfilov) refactor "modifyBody" to return modified value, not change original fnArr
       if (bodyConfig.positions)  fnArr = this.modifyAtPositions(fnArr, bodyConfig.positions);
       if (bodyConfig.regexps)  fnArr = this.modifyAtRegexp(fnArr, bodyConfig.regexps);
       return fnArr;
@@ -195,57 +197,31 @@ var Monkey = (function (config) {
   };
 
   var exports = {
-    config: config,
-    originalFn: null,
-    modifiedFn: null,
-    before: config.before,
-    after: config.after,
-    isLazy: false,
+    _modifyBody: function (method) {
+      //TODO (S.Panfilov) rename and perhaps move outside
+
+      var fnArr = _p.getStrArr(method, this.linesDelimiter);
+      _p.modifyBody(fnArr, config.body);
+      return _p.makeFn(fnArr, this.originalFn, this.linesDelimiter);
+    },
+    _wrapFn: function (fn) {
+      //TODO (S.Panfilov) move outside
+
+      if (config.before) config.before(arguments);
+      var returnValue = fn(arguments);
+      if (config.after) config.after(arguments);
+
+      return returnValue;
+    },
     punch: function () {
-      this.originalFn = this.config.obj[this.config.method];
+      var fn = config.obj[config.method];
+      if (config.body) fn = this._modifyBody(fn);
 
-      if (this.config.body) {
-        this.modifiedFn = this.config.obj[this.config.method];
-        var fnArr = _p.getStrArr(this.modifiedFn, this.linesDelimiter);
-        _p.modifyBody(fnArr, config.body);
-        this.modifiedFn = _p.makeFn(fnArr, this.originalFn, this.linesDelimiter);
-      }
-
-      if (!this.before && !this.after) {
-        this.config.obj[this.config.method] = this.modifiedFn || this.originalFn;
-      } else {
-        var self = this;
-
-        this.config.obj[this.config.method] = function () {
-          console.log(222);
-          console.log(this);
-          console.log(333);
-          console.log(self.config.obj);
-          if (isBefore) self.before.bind(this, arguments);
-
-          var fn = self.modifiedFn ? self.modifiedFn : self.originalFn;
-          fn.bind(this, arguments);
-          var returnValue = fn();
-
-          if (isAfter) self.after.bind(this, arguments);
-
-          return returnValue;
-        }.bind(this.config.obj)
-      }
-
-      return this;
-    },
-    restore: function () {
-      config.obj[config.method] = this.original;
-      this.isModified = false;
-      return this;
-    },
-    clear: function (isClearOrigin) {
-      //TODO (S.Panfilov) clear monkey object, but stay patched
-      //Perhaps should save optional possibility to restore after clear
+      config.obj[config.method] = (config.before || config.after) ? this._wrapFn(fn) : fn;
       return this;
     }
   };
+
 
   if (config.body) exports.linesDelimiter = config.body.linesDelimiter;
 

@@ -48,7 +48,7 @@ describe('After tests.', function () {
     patchTarget.property = [];
 
     function doItAfter() {
-      this.property.push(afterStr);
+      patchTarget.property.push(afterStr);
     }
 
     new Monkey({
