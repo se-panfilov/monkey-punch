@@ -200,24 +200,21 @@ var Monkey = (function (config) {
     _modifyBody: function (method) {
       //TODO (S.Panfilov) rename and perhaps move outside
 
-      var fnArr = _p.getStrArr(method, this.linesDelimiter);
+      var fnArr = _p.getStrArr(method, config.body.linesDelimiter);
       _p.modifyBody(fnArr, config.body);
-      return _p.makeFn(fnArr, this.originalFn, this.linesDelimiter);
-    },
-    _wrapFn: function (fn) {
-      //TODO (S.Panfilov) move outside
-
-      if (config.before) config.before(arguments);
-      var returnValue = fn(arguments);
-      if (config.after) config.after(arguments);
-
-      return returnValue;
+      return _p.makeFn(fnArr, config.obj[config.method], config.body.linesDelimiter);
     },
     punch: function () {
       var fn = config.obj[config.method];
       if (config.body) fn = this._modifyBody(fn);
 
-      config.obj[config.method] = (config.before || config.after) ? this._wrapFn(fn) : fn;
+      config.obj[config.method] = function () {
+        if (config.before) config.before.apply(this, arguments);
+        var returnValue = fn.apply(this, arguments);
+        if (config.after) config.after.apply(this, arguments);
+        return returnValue;
+      }.bind(config.obj);
+
       return this;
     }
   };
